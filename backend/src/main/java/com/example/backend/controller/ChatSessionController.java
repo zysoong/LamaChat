@@ -16,7 +16,7 @@ public class ChatSessionController {
     @ResponseStatus(HttpStatus.CREATED)
     public void addChatSession(@PathVariable("participantOneId") String participantOneId, @PathVariable("participantTwoId") String participantTwoId)
     {
-
+        chatSessionService.addChatSession(participantOneId, participantTwoId);
     }
 
 }
