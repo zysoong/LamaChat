@@ -69,6 +69,7 @@ public class ChatSessionService
                                 {
                                     isChatSessionFound.set(false);
                                     return new ChatSession(
+                                            null,
                                             sessionIdentifier,
                                             new ArrayList<ChatMessage>()
                                     );
@@ -77,38 +78,14 @@ public class ChatSessionService
 
         if (!isChatSessionFound.get()){
 
-            List<ChatSession> participantOneChatSessionUpdated = participantOne.chat_sessions();
-            participantOneChatSessionUpdated.add(newChatSession);
-            List<ChatSession> participantTwoChatSessionUpdated = participantTwo.chat_sessions();
-            participantTwoChatSessionUpdated.add(newChatSession);
+            ChatSession addChatSession = chatSessionRepository.save(newChatSession);
 
-            chatSessionRepository.save(newChatSession);
+            participantOne.chat_sessions().add(addChatSession);
+            appUserRepository.save(participantOne);
 
-            appUserRepository.save(
-                    new AppUser(
-                            participantOne.userId(),
-                            participantOne.userName(),
-                            participantOne.password(),
-                            participantOne.role(),
-                            participantOneChatSessionUpdated,
-                            participantOne.isVirtualAgent(),
-                            participantOne.api(),
-                            participantOne.apiKey()
-                    )
-            );
+            participantTwo.chat_sessions().add(addChatSession);
+            appUserRepository.save(participantTwo);
 
-            appUserRepository.save(
-                    new AppUser(
-                            participantTwo.userId(),
-                            participantTwo.userName(),
-                            participantTwo.password(),
-                            participantTwo.role(),
-                            participantTwoChatSessionUpdated,
-                            participantTwo.isVirtualAgent(),
-                            participantTwo.api(),
-                            participantTwo.apiKey()
-                    )
-            );
         }
         return newChatSession;
     }
