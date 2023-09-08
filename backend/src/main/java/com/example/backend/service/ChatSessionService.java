@@ -38,6 +38,15 @@ public class ChatSessionService
                 .orElseThrow(() -> new NoSuchElementException("Session with Id " + sessionIdentifier + " was not found. "));
     }
 
+    /**
+     * Create a new chat session with empty message list.
+     * If one of the participants not exists, then throw NoSuchElementException.
+     * If chat session already exists, do nothing, otherwise create a new chat session in DB and assign it to the
+     *session lists of both participants
+     * @param participantOneId
+     * @param participantTwoId
+     * @return
+     */
     public ChatSession addChatSession(String participantOneId, String participantTwoId)
     {
 
@@ -104,6 +113,13 @@ public class ChatSessionService
         return newChatSession;
     }
 
+    /**
+     * Push a chat message to chat session.
+     * If the chat session does not exist, then create a new one with the "addChatSession" function
+     * @param participantOneId
+     * @param participantTwoId
+     * @param msg
+     */
     public void addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
         ChatSession session = addChatSession(participantOneId, participantTwoId);
