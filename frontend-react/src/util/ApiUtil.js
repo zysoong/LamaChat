@@ -64,8 +64,6 @@ const loginBasicAuth = (token) => {
 
     const headers = new Headers();
 
-    localStorage.setItem("accessToken", token)
-
     headers.append(
         "Authorization",
         "Basic " + token
@@ -90,7 +88,8 @@ const loginBasicAuth = (token) => {
             response.text().then(
               (data) => 
                 {
-                  return localStorage.setItem("loggedUser", data);
+                  localStorage.setItem("loggedUser", data);
+                  localStorage.setItem("accessToken", token)
                 }
             )
             .then( () =>
