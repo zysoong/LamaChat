@@ -11,6 +11,29 @@ const request = (options) => {
 
   headers.append("Accept", "application/json");
 
+  const defaults = { headers: headers };
+  options = Object.assign({}, defaults, options);
+
+  return fetch(options.url, options).then((response) =>
+    response.json().then((json) => {
+      if (!response.ok) {
+        return Promise.reject(json);
+      }
+      return json;
+    })
+  );
+};
+
+
+const requestText = (options) => {
+  const headers = new Headers();
+
+  if (options.setContentType !== false) {
+    headers.append("Content-Type", "application/json");
+  }
+
+  //headers.append("Accept", "application/json");
+
   if (localStorage.getItem("sessionId")) {
     headers.append(
       "Cookie",
@@ -22,7 +45,7 @@ const request = (options) => {
   options = Object.assign({}, defaults, options);
 
   return fetch(options.url, options).then((response) =>
-    response.json().then((json) => {
+    response.text().then((json) => {
       if (!response.ok) {
         return Promise.reject(json);
       }
@@ -69,11 +92,12 @@ const loginBasicAuth = (token) => {
                 description: "User " + localStorage.getItem("loggedUser") + " has successfully logged in. ",
               })
             )
+            .then( () => getMe()) //TODO only for testing
             .catch(
               (error) => notification.error({
                 message: "Error",
                 description:
-                  error.message || "Sorry! Something went wrong. Please try again!",
+                  error.message || "Login succeed but something went wrong.",
               })
             )
           }
@@ -93,12 +117,8 @@ export function signup(signupRequest) {
   });
 }
 
-export function getCurrentUser() {
-  if (!localStorage.getItem("accessToken")) {
-    return Promise.reject("No access token set.");
-  }
-
-  return request({
+export function getMe() {
+  return requestText({
     url: AUTH_SERVICE + "/api/auth/me",
     method: "GET",
   });
