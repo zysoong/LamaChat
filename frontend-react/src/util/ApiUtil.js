@@ -28,6 +28,11 @@ const request = (options) => {
 const requestText = (options) => {
   const headers = new Headers();
 
+    headers.append(
+        "Authorization",
+        "Basic " + localStorage.getItem("accessToken")
+    );
+
   if (options.setContentType !== false) {
     headers.append("Content-Type", "application/json");
   }
@@ -58,6 +63,8 @@ const requestText = (options) => {
 const loginBasicAuth = (token) => {
 
     const headers = new Headers();
+
+    localStorage.setItem("accessToken", token)
 
     headers.append(
         "Authorization",
