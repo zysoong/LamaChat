@@ -57,46 +57,25 @@ const loginBasicAuth = (token) => {
 
           else if (response.ok){
 
-            const p1 =  new Promise((resolve, reject) => {response.text().then(
+            response.text().then(
               (data) => 
                 {
-                  localStorage.setItem("loggedUser", data);
+                  return localStorage.setItem("loggedUser", data);
                 }
-            )});
-
-            
-            Promise.all([p1])
-              .then(
-                notification.success({
-                  message: "Info",
-                  description: "User " + localStorage.getItem("loggedUser") + " has successfully logged in. ",
-                })
-              )
-              .catch(
-                (error) => notification.error({
-                  message: "Error",
-                  description:
-                    error.message || "Sorry! Something went wrong. Please try again!",
-                })
-              )
-
-            return response;
-
-          }
-        }).catch((error) => {
-          if (error.status === 401) {
-            notification.error({
-              message: "Error",
-              description: "Username or Password is incorrect. Please try again!",
-            });
-          } 
-          
-          else {
-            notification.error({
-              message: "Error",
-              description:
-                error.message || "Sorry! Something went wrong. Please try again!",
-            });
+            )
+            .then( () =>
+              notification.success({
+                message: "Info",
+                description: "User " + localStorage.getItem("loggedUser") + " has successfully logged in. ",
+              })
+            )
+            .catch(
+              (error) => notification.error({
+                message: "Error",
+                description:
+                  error.message || "Sorry! Something went wrong. Please try again!",
+              })
+            )
           }
         });
 

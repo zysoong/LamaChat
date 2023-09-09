@@ -18,8 +18,8 @@ const Signin = (props) => {
     setLoading(true);
 
     login(btoa(values.username + ':' + values.password))
-    .then((response) => {
-      props.history.push("/");
+    .then(() => {
+      props.history.push("/dead");
       setLoading(false);
     })
     .catch((error) => {
