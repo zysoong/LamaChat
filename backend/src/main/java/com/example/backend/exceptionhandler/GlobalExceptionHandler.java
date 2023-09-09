@@ -11,17 +11,16 @@ import java.util.NoSuchElementException;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NoSuchElementException.class)
-    public ResponseEntity<String> handleNoSuchElementException(NoSuchElementException ex) {
+    public ResponseEntity<ErrorResponse> handleNoSuchElementException(NoSuchElementException ex) {
         // You can customize the error message and HTTP status code as needed
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("[Resource not found]: " + ex.getMessage());
+        return new ResponseEntity<>(new ErrorResponse("[Resource not found]: " + ex.getMessage()), HttpStatus.BAD_REQUEST);
+
     }
 
     @ExceptionHandler(MongoWriteException.class)
-    public ResponseEntity<String> handleMongoWriteException(MongoWriteException ex) {
+    public ResponseEntity<ErrorResponse> handleMongoWriteException(MongoWriteException ex) {
         // You can customize the error message and HTTP status code as needed
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("[Write data to Mongo failed, may be unique key already exists?]: " + ex.getMessage());
+        return new ResponseEntity<>(new ErrorResponse("[Write data to Mongo failed, may be unique key already exists?]: " + ex.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
 }

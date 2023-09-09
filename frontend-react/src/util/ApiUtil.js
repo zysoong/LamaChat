@@ -5,6 +5,13 @@ const CHAT_SERVICE = "http://localhost:8080";
 const request = (options) => {
   const headers = new Headers();
 
+  if (localStorage.getItem("accessToken") !== null){
+    headers.append(
+      "Authorization",
+      "Basic " + localStorage.getItem("accessToken")
+    );
+  }
+
   if (options.setContentType !== false) {
     headers.append("Content-Type", "application/json");
   }
@@ -28,10 +35,12 @@ const request = (options) => {
 const requestText = (options) => {
   const headers = new Headers();
 
+  if (localStorage.getItem("accessToken") !== null){
     headers.append(
-        "Authorization",
-        "Basic " + localStorage.getItem("accessToken")
+      "Authorization",
+      "Basic " + localStorage.getItem("accessToken")
     );
+  }
 
   if (options.setContentType !== false) {
     headers.append("Content-Type", "application/json");
@@ -63,6 +72,7 @@ const requestText = (options) => {
 const loginBasicAuth = (token) => {
 
     const headers = new Headers();
+    localStorage.setItem("accessToken", token);
 
     headers.append(
         "Authorization",
@@ -88,8 +98,7 @@ const loginBasicAuth = (token) => {
             response.text().then(
               (data) => 
                 {
-                  localStorage.setItem("loggedUser", data);
-                  localStorage.setItem("accessToken", token)
+                  return localStorage.setItem("loggedUser", data); 
                 }
             )
             .then( () =>
@@ -98,13 +107,19 @@ const loginBasicAuth = (token) => {
                 description: "User " + localStorage.getItem("loggedUser") + " has successfully logged in. ",
               })
             )
-            .then( () => getMe()) //TODO only for testing
+            
+            .then( () => {return getMe()}) //TODO only for testing
+            .then( (me) => {return findUserByUserName(me)})
             .catch(
-              (error) => notification.error({
-                message: "Error",
-                description:
-                  error.message || "Login succeed but something went wrong.",
-              })
+              (error) => {
+                notification.error({
+                  message: "Error",
+                  description:
+                    error.message || "Login granted. Internal error. ",
+                })
+                localStorage.removeItem("accessToken")
+                localStorage.removeItem("loggedUser")
+              }
             )
           }
         });
@@ -128,6 +143,13 @@ export function getMe() {
     url: AUTH_SERVICE + "/api/auth/me",
     method: "GET",
   });
+}
+
+export function findUserByUserName(userName) {
+  return request({
+    url: AUTH_SERVICE + "/api/auth/" + userName,
+    method: "GET",
+  }).then((json) => console.log(json.userId));
 }
 
 

@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -46,6 +47,13 @@ public class AppUserService implements UserDetailsService {
         );
 
         appUserRepository.save(userToSave);
+    }
+
+
+    public AppUser findAppUserByUserName(String userName){
+        return appUserRepository
+                .findAppUserByUserName(userName)
+                .orElseThrow(() -> new NoSuchElementException("User name " + userName + "not found!"));
     }
 
 }

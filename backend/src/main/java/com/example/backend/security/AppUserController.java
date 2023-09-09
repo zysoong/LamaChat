@@ -26,6 +26,14 @@ public class AppUserController {
         return "anonymousUser";
     }
 
+    @GetMapping("/{userName}")
+    public AppUser getByUserName(@PathVariable String userName, Principal principal){
+        /*if (principal != null) {
+            return principal.getName();
+        }*/
+        return appUserService.findAppUserByUserName(userName);
+    }
+
     @PostMapping("/login")
     public ResponseEntity<String> login(Principal principal){
         String loggedUser = SecurityContextHolder.getContext().getAuthentication().getName();
