@@ -12,6 +12,8 @@ import org.springframework.security.crypto.argon2.Argon2PasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.util.Arrays;
+
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
