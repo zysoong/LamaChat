@@ -59,20 +59,35 @@ const loginBasicAuth = (token) => {
 
           else if (response.ok){
 
-            console.log("AAAAAAAA")
-            console.log(localStorage.getItem("loggedUser").toString())
+            const p1 =  new Promise((resolve, reject) => {response.text().then(
+              (data) => 
+                {
+                  localStorage.setItem("loggedUser", data);
 
-            localStorage.setItem("loggedUser", response.body)
+                  notification.success({
+                    message: "Info",
+                    description: "User " + data + " successfully logged in. ",
+                  });
+                }
+            )});
 
-            const cookieHeaderStr = response.headers.get('Set-Cookie');
-            localStorage.setItem("sessionId", cookieHeaderStr.substring(11, cookieHeaderStr.indexOf(";")))
+            const p2 = new Promise((resolve, reject) => {
+              console.log(response.headers.has("Set-Cookie"))
+              const data = response.headers.getSetCookie()[0]
+              localStorage.setItem("sessionId", data.substring(11, data.indexOf(";")))
+              resolve();
+            })
 
-            console.log(response)
-            console.log(localStorage.getItem("loggedUser"))
+            Promise.all([p1, p2]).then()
+              .catch(
+                (error) => notification.error({
+                  message: "Error",
+                  description:
+                    error.message || "Sorry! Something went wrong. Please try again!",
+                })
+              )
 
-            console.log("AAfdsfsdAAAAAA")
-
-            //return response.json();
+            return response;
 
           }
         }).catch((error) => {
