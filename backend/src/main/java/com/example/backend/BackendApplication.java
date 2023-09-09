@@ -17,7 +17,10 @@ public class BackendApplication {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry reg){
-                reg.addMapping("/**").allowedOrigins("*");
+                reg.addMapping("/**")
+                        .allowedOriginPatterns("*")
+                        .exposedHeaders("Set-Cookie")
+                        .allowCredentials(true);
             }
         };
     }

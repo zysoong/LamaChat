@@ -1,5 +1,4 @@
 import { notification } from "antd";
-
 const AUTH_SERVICE = "http://localhost:8080";
 const CHAT_SERVICE = "http://localhost:8080";
 
@@ -46,14 +45,13 @@ const loginBasicAuth = (token) => {
     const options = Object.assign({}, defaults, {
         url: AUTH_SERVICE + "/api/auth/login",
         method: "POST", 
-        body: ""
+        credentials: "include"
     });
 
     return fetch(options.url, options).then((response) => 
         {
 
           if (!response.ok) {
-            console.log("BBBB")
             return Promise.reject(response);
           }
 
@@ -63,22 +61,17 @@ const loginBasicAuth = (token) => {
               (data) => 
                 {
                   localStorage.setItem("loggedUser", data);
-
-                  notification.success({
-                    message: "Info",
-                    description: "User " + data + " successfully logged in. ",
-                  });
                 }
             )});
 
-            const p2 = new Promise((resolve, reject) => {
-              console.log(response.headers.has("Set-Cookie"))
-              const data = response.headers.getSetCookie()[0]
-              localStorage.setItem("sessionId", data.substring(11, data.indexOf(";")))
-              resolve();
-            })
-
-            Promise.all([p1, p2]).then()
+            
+            Promise.all([p1])
+              .then(
+                notification.success({
+                  message: "Info",
+                  description: "User " + localStorage.getItem("loggedUser") + " has successfully logged in. ",
+                })
+              )
               .catch(
                 (error) => notification.error({
                   message: "Error",

@@ -10,31 +10,36 @@ import "./Signin.css";
 
 
 const Signin = (props) => {
+
   const [loading, setLoading] = useState(false);
+  
 
   const onFinish = (values) => {
     setLoading(true);
 
     login(btoa(values.username + ':' + values.password))
-      .then((response) => {
-        props.history.push("/");
-        setLoading(false);
-      })
-      .catch((error) => {
-        if (error.status === 401) {
-          notification.error({
-            message: "Error",
-            description: "Username or Password is incorrect. Please try again!",
-          });
-        } else {
-          notification.error({
-            message: "Error",
-            description:
-              error.message || "Sorry! Something went wrong. Please try again!",
-          });
-        }
-        setLoading(false);
-      });
+    .then((response) => {
+      props.history.push("/");
+      setLoading(false);
+    })
+    .catch((error) => {
+      if (error.status === 401) {
+        notification.error({
+          message: "Error",
+          description: "Username or Password is incorrect. Please try again!",
+        });
+      } else {
+        notification.error({
+          message: "Error",
+          description:
+            error.message || "Sorry! Something went wrong. Please try again!",
+        });
+      }
+      setLoading(false);
+    });
+
+
+    
   };
 
   return (
@@ -80,6 +85,8 @@ const Signin = (props) => {
         </Form.Item>
         <Divider>OR</Divider>
         Not a member yet? <a href="/signup">Sign up</a>
+        <Divider>OR</Divider>
+        Test: <a href="/test">Test</a>
       </Form>
     </div>
   );

@@ -1,5 +1,6 @@
 package com.example.backend.configuration;
 
+import org.springframework.boot.web.servlet.server.CookieSameSiteSupplier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -50,4 +51,11 @@ public class SecurityConfig {
                 //.logout(Customizer.withDefaults())
                 .build();
     }
+
+    @Bean
+    public CookieSameSiteSupplier applicationCookieSameSiteSupplier() {
+        return CookieSameSiteSupplier.ofNone();
+    }
+
+
 }
