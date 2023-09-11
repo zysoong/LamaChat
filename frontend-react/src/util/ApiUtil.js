@@ -1,14 +1,15 @@
 import { notification } from "antd";
+import secureLocalStorage from "react-secure-storage";
 const AUTH_SERVICE = "http://localhost:8080";
 const CHAT_SERVICE = "http://localhost:8080";
 
 const request = (options) => {
   const headers = new Headers();
 
-  if (localStorage.getItem("accessToken") !== null){
+  if (secureLocalStorage.getItem("accessToken") !== null){
     headers.append(
       "Authorization",
-      "Basic " + localStorage.getItem("accessToken")
+      "Basic " + secureLocalStorage.getItem("accessToken")
     );
   }
 
@@ -35,10 +36,10 @@ const request = (options) => {
 const requestText = (options) => {
   const headers = new Headers();
 
-  if (localStorage.getItem("accessToken") !== null){
+  if (secureLocalStorage.getItem("accessToken") !== null){
     headers.append(
       "Authorization",
-      "Basic " + localStorage.getItem("accessToken")
+      "Basic " + secureLocalStorage.getItem("accessToken")
     );
   }
 
@@ -48,10 +49,10 @@ const requestText = (options) => {
 
   //headers.append("Accept", "application/json");
 
-  if (localStorage.getItem("sessionId")) {
+  if (secureLocalStorage.getItem("sessionId")) {
     headers.append(
       "Cookie",
-      "JSESSIONID= " + localStorage.getItem("sessionId")
+      "JSESSIONID= " + secureLocalStorage.getItem("sessionId")
     );
   }
 
@@ -59,11 +60,11 @@ const requestText = (options) => {
   options = Object.assign({}, defaults, options);
 
   return fetch(options.url, options).then((response) =>
-    response.text().then((json) => {
+    response.text().then((data) => {
       if (!response.ok) {
-        return Promise.reject(json);
+        return Promise.reject(data);
       }
-      return json;
+      return data;
     })
   );
 };
@@ -72,7 +73,7 @@ const requestText = (options) => {
 const loginBasicAuth = (token) => {
 
     const headers = new Headers();
-    localStorage.setItem("accessToken", token);
+    secureLocalStorage.setItem("accessToken", token);
 
     headers.append(
         "Authorization",
@@ -95,30 +96,25 @@ const loginBasicAuth = (token) => {
 
           else if (response.ok){
 
-            response.text().then(
-              (data) => 
-                {
-                  return localStorage.setItem("loggedUser", data); 
+            response.text()
+            .then( () => {return getMe()})
+            .then( (me) => {
+                    notification.success({
+                        message: "Info",
+                        description: "User " + me + " has successfully logged in. ",
+                    })
+                    secureLocalStorage.setItem("loggedUser", "" + me);
                 }
             )
-            .then( () =>
-              notification.success({
-                message: "Info",
-                description: "User " + localStorage.getItem("loggedUser") + " has successfully logged in. ",
-              })
-            )
-            
-            .then( () => {return getMe()}) //TODO only for testing
-            .then( (me) => {return findUserByUserName(me)})
             .catch(
               (error) => {
                 notification.error({
                   message: "Error",
                   description:
-                    error.message || "Login granted. Internal error. ",
+                    error.message || "Authentication session invalid. Please check your user name or password. ",
                 })
-                localStorage.removeItem("accessToken")
-                localStorage.removeItem("loggedUser")
+                  secureLocalStorage.removeItem("accessToken")
+                  secureLocalStorage.removeItem("loggedUser");
               }
             )
           }
@@ -130,6 +126,20 @@ export function loginWithToken(token){
   return loginBasicAuth(token);
 }
 
+export function getMe() {
+    return requestText({
+        url: AUTH_SERVICE + "/api/auth/me",
+        method: "GET",
+    });
+}
+
+export function logout() {
+    return requestText({
+        url: AUTH_SERVICE + "/api/auth/logout",
+        method: "POST",
+    });
+}
+
 export function signup(signupRequest) {
   return request({
     url: AUTH_SERVICE + "/api/auth/register",
@@ -138,23 +148,19 @@ export function signup(signupRequest) {
   });
 }
 
-export function getMe() {
-  return requestText({
-    url: AUTH_SERVICE + "/api/auth/me",
-    method: "GET",
-  });
-}
+
 
 export function findUserByUserName(userName) {
   return request({
     url: AUTH_SERVICE + "/api/auth/" + userName,
     method: "GET",
-  }).then((json) => console.log(json.userId));
+  })
+  .then((json) => {return json.userName})
 }
 
 
 export function findChatMessages(senderId, recipientId) {
-  if (!localStorage.getItem("accessToken")) {
+  if (!secureLocalStorage.getItem("accessToken")) {
     return Promise.reject("No access token set.");
   }
 
@@ -165,7 +171,7 @@ export function findChatMessages(senderId, recipientId) {
 }
 
 export function findChatMessage(id) {
-  if (!localStorage.getItem("accessToken")) {
+  if (!secureLocalStorage.getItem("accessToken")) {
     return Promise.reject("No access token set.");
   }
 

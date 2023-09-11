@@ -3,6 +3,7 @@ import {Button, Divider, Form, Input, notification} from "antd";
 import {DingtalkOutlined, LockOutlined, UserOutlined,} from "@ant-design/icons";
 import {loginWithToken} from "../util/ApiUtil";
 import "./Signin.css";
+import secureLocalStorage from "react-secure-storage";
 
 
 const SignIn = (props) => {
@@ -10,13 +11,14 @@ const SignIn = (props) => {
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (localStorage.getItem("accessToken") !== null) {
+
+        if (secureLocalStorage.getItem("accessToken") !== null && secureLocalStorage.getItem("loggedUser") !== null) {
 
             setLoading(true);
 
-            loginWithToken(localStorage.getItem("accessToken"))
+            loginWithToken(secureLocalStorage.getItem("accessToken"))
                 .then(() => {
-                    props.history.push("/dead")
+                    props.history.push("/profile")
                     setLoading(false)
                 })
                 .catch((error) => {
@@ -25,16 +27,16 @@ const SignIn = (props) => {
                             message: "Error",
                             description: "Invalid login",
                         })
-                        localStorage.removeItem("accessToken")
-                        localStorage.removeItem("loggedUser")
+                        secureLocalStorage.removeItem("accessToken");
+                        secureLocalStorage.removeItem("loggedUser");
                     } else {
                         notification.error({
                             message: "Error",
                             description:
                                 error.message || "Sorry! Something went wrong. Please try again!",
                         })
-                        localStorage.removeItem("accessToken")
-                        localStorage.removeItem("loggedUser")
+                        secureLocalStorage.removeItem("accessToken");
+                        secureLocalStorage.removeItem("loggedUser");
                     }
                     setLoading(false);
                 });
@@ -48,7 +50,7 @@ const SignIn = (props) => {
 
         loginWithToken(btoa(values.username + ':' + values.password))
             .then(() => {
-                props.history.push("/dead");
+                props.history.push("/profile");
                 setLoading(false);
             })
             .catch((error) => {
@@ -57,12 +59,16 @@ const SignIn = (props) => {
                         message: "Error",
                         description: "Username or Password is incorrect. Please try again!",
                     });
+                    secureLocalStorage.removeItem("accessToken");
+                    secureLocalStorage.removeItem("loggedUser");
                 } else {
                     notification.error({
                         message: "Error",
                         description:
                             error.message || "Sorry! Something went wrong. Please try again!",
                     });
+                    secureLocalStorage.removeItem("accessToken")
+                    secureLocalStorage.removeItem("loggedUser");
                 }
                 setLoading(false);
             });
