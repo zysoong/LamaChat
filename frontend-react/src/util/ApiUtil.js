@@ -126,7 +126,7 @@ const loginBasicAuth = (token) => {
 
 }
 
-export function login(token){
+export function loginWithToken(token){
   return loginBasicAuth(token);
 }
 

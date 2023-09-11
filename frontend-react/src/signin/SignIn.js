@@ -1,19 +1,52 @@
-import React, {useState} from "react";
+import React, {useEffect, useState} from "react";
 import {Button, Divider, Form, Input, notification} from "antd";
 import {DingtalkOutlined, LockOutlined, UserOutlined,} from "@ant-design/icons";
-import {login} from "../util/ApiUtil";
+import {loginWithToken} from "../util/ApiUtil";
 import "./Signin.css";
 
 
-const Signin = (props) => {
+const SignIn = (props) => {
 
     const [loading, setLoading] = useState(false);
 
+    useEffect((props) => {
+        if (localStorage.getItem("accessToken") !== null) {
+
+            setLoading(true);
+
+            loginWithToken(localStorage.getItem("accessToken"))
+                .then(() => {
+                    props.history.push("/dead")
+                    setLoading(false)
+                })
+                .catch((error) => {
+                    if (error.status === 401) {
+                        notification.error({
+                            message: "Error",
+                            description: "Invalid login",
+                        })
+                        localStorage.removeItem("accessToken")
+                        localStorage.removeItem("loggedUser")
+                    } else {
+                        notification.error({
+                            message: "Error",
+                            description:
+                                error.message || "Sorry! Something went wrong. Please try again!",
+                        })
+                        localStorage.removeItem("accessToken")
+                        localStorage.removeItem("loggedUser")
+                    }
+                    setLoading(false);
+                });
+
+        }
+    }, [props.history]);
 
     const onFinish = (values) => {
+
         setLoading(true);
 
-        login(btoa(values.username + ':' + values.password))
+        loginWithToken(btoa(values.username + ':' + values.password))
             .then(() => {
                 props.history.push("/dead");
                 setLoading(false);
@@ -33,8 +66,6 @@ const Signin = (props) => {
                 }
                 setLoading(false);
             });
-
-
     };
 
     return (
@@ -87,4 +118,4 @@ const Signin = (props) => {
     );
 };
 
-export default Signin;
+export default SignIn;
