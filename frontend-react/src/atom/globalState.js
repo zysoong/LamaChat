@@ -1,8 +1,8 @@
 import { atom } from "recoil";
 
 export const loggedInUser = atom({
-    key: "loggedInUser",
     default: {},
+    key: "loggedInUser",
     persistence_UNSTABLE: {
         type: "loggedInUser",
     },

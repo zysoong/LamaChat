@@ -13,7 +13,7 @@ const {RecoilPersist, updateState} = recoilPersist([], {
 
 ReactDOM.render(
     <RecoilRoot initializeState={updateState}>
-        <RecoilPersist/>
+    <RecoilPersist/>
         <App/>
     </RecoilRoot>,
     document.getElementById("root")

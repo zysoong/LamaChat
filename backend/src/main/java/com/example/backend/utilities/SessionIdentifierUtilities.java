@@ -53,7 +53,7 @@ public class SessionIdentifierUtilities {
         List<String> participants = getParticipantIDsFromUniqueIdentifier(sessionUniqueIdentifier);
 
         for (String participantID : participants){
-            if (participantID.equals(senderId)) return participantID;
+            if (!participantID.equals(senderId)) return participantID;
         }
 
         return "anonymousUser";

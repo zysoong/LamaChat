@@ -1,5 +1,7 @@
 package com.example.backend.controller;
 
+import com.example.backend.model.ChatMessage;
+import com.example.backend.model.ChatSession;
 import com.example.backend.service.ChatSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -14,9 +16,18 @@ public class ChatSessionController {
 
     @PostMapping("/{participantOneId}/{participantTwoId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addChatSession(@PathVariable("participantOneId") String participantOneId, @PathVariable("participantTwoId") String participantTwoId)
+    public ChatSession addChatSession(@PathVariable("participantOneId") String participantOneId, @PathVariable("participantTwoId") String participantTwoId)
     {
-        chatSessionService.addChatSession(participantOneId, participantTwoId);
+        return chatSessionService.addChatSession(participantOneId, participantTwoId);
+    }
+
+    @PostMapping("message/{participantOneId}/{participantTwoId}")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void addChatSession(@PathVariable("participantOneId") String participantOneId,
+                               @PathVariable("participantTwoId") String participantTwoId,
+                               @RequestBody ChatMessage msg)
+    {
+        chatSessionService.addChatMessageToChatSession(participantOneId, participantTwoId, msg);
     }
 
 }

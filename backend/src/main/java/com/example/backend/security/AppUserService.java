@@ -56,4 +56,10 @@ public class AppUserService implements UserDetailsService {
                 .orElseThrow(() -> new NoSuchElementException("User name " + userName + "not found!"));
     }
 
+    public AppUser findAppUserByUserId(String userId){
+        return appUserRepository
+                .findAppUserByUserId(userId)
+                .orElseThrow(() -> new NoSuchElementException("User id " + userId + "not found!"));
+    }
+
 }

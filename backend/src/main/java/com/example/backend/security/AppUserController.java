@@ -1,5 +1,7 @@
 package com.example.backend.security;
 
+import com.example.backend.model.ChatSession;
+import com.example.backend.utilities.SessionIdentifierUtilities;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.CacheControl;
@@ -9,6 +11,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -24,6 +28,22 @@ public class AppUserController {
             return principal.getName();
         }
         return "anonymousUser";
+    }
+
+    @GetMapping("/me/contacts")
+    public List<AppUser> getMyContacts(Principal principal){
+        if (principal != null) {
+
+            AppUser me = appUserService.findAppUserByUserName(principal.getName());
+            ArrayList<AppUser> res = new ArrayList<>();
+            for (ChatSession session : me.chat_sessions()){
+                res.add(appUserService.findAppUserByUserId(
+                        SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(session.uniqueSessionIdentifier(), me.userId())
+                ));
+            }
+            return res;
+        }
+        return new ArrayList<>();
     }
 
     @GetMapping("/{userName}")

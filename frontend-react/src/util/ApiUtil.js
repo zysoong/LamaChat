@@ -99,6 +99,7 @@ const loginBasicAuth = (token) => {
             response.text()
             .then( () => {return getMe()})
             .then( (me) => {
+                    //findUserByUserName(me).then()
                     notification.success({
                         message: "Info",
                         description: "User " + me + " has successfully logged in. ",
@@ -133,6 +134,13 @@ export function getMe() {
     });
 }
 
+export function getMyContacts() {
+    return request({
+        url: AUTH_SERVICE + "/api/auth/me/contacts",
+        method: "GET",
+    });
+}
+
 export function logout() {
     return requestText({
         url: AUTH_SERVICE + "/api/auth/logout",
@@ -155,28 +163,13 @@ export function findUserByUserName(userName) {
     url: AUTH_SERVICE + "/api/auth/" + userName,
     method: "GET",
   })
-  .then((json) => {return json.userName})
+  .then((json) => {return json})
 }
 
-
-export function findChatMessages(senderId, recipientId) {
-  if (!secureLocalStorage.getItem("accessToken")) {
-    return Promise.reject("No access token set.");
-  }
-
-  return request({
-    url: CHAT_SERVICE + "/messages/" + senderId + "/" + recipientId,
-    method: "GET",
-  });
-}
-
-export function findChatMessage(id) {
-  if (!secureLocalStorage.getItem("accessToken")) {
-    return Promise.reject("No access token set.");
-  }
-
-  return request({
-    url: CHAT_SERVICE + "/messages/" + id,
-    method: "GET",
-  });
+export function findOrAddChatSessionByParticipantIds(id1, id2) {
+    return request({
+        url: CHAT_SERVICE + "/api/chatsessions/" + id1 + "/" + id2,
+        method: "POST",
+    })
+        .then((json) => {return json})
 }

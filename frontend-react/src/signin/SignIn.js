@@ -18,7 +18,7 @@ const SignIn = (props) => {
 
             loginWithToken(secureLocalStorage.getItem("accessToken"))
                 .then(() => {
-                    props.history.push("/profile")
+                    props.history.push("/chat")
                     setLoading(false)
                 })
                 .catch((error) => {
@@ -50,7 +50,7 @@ const SignIn = (props) => {
 
         loginWithToken(btoa(values.username + ':' + values.password))
             .then(() => {
-                props.history.push("/profile");
+                props.history.push("/chat");
                 setLoading(false);
             })
             .catch((error) => {

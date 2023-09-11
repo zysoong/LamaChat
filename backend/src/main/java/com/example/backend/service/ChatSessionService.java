@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.model.ChatMessage;
 import com.example.backend.model.ChatSession;
+import com.example.backend.repository.ChatMessageRepository;
 import com.example.backend.repository.ChatSessionRepository;
 import com.example.backend.security.AppUser;
 import com.example.backend.security.AppUserRepository;
@@ -20,6 +21,7 @@ public class ChatSessionService
 {
     private final ChatSessionRepository chatSessionRepository;
     private final AppUserRepository appUserRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public ChatSession getChatSession(String participantOneId, String participantTwoId)
     {
@@ -99,6 +101,20 @@ public class ChatSessionService
      */
     public void addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
+        chatMessageRepository.save(msg);
+
+        addChatSession(participantOneId, participantTwoId);
+        String sessionUniqueIdentifier = SessionIdentifierUtilities.generateSessionUniqueIdentifier(participantOneId, participantTwoId);
+
+        ChatSession sessionWithMsgToBeAttached = chatSessionRepository.findChatSessionByUniqueSessionIdentifier(
+                sessionUniqueIdentifier
+        ).orElseThrow(() -> new NoSuchElementException("[Internal error]Chat session with session ID " +
+            sessionUniqueIdentifier + "not found! "));
+
+        sessionWithMsgToBeAttached.chat_messages().add(msg);
+
+        chatSessionRepository.save(sessionWithMsgToBeAttached);
+
     }
 
 
