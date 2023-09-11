@@ -9,7 +9,7 @@ const SignIn = (props) => {
 
     const [loading, setLoading] = useState(false);
 
-    useEffect((props) => {
+    useEffect(() => {
         if (localStorage.getItem("accessToken") !== null) {
 
             setLoading(true);
