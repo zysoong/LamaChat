@@ -48,4 +48,15 @@ public class SessionIdentifierUtilities {
         return result;
     }
 
+    public static String getReceiverFromUniqueIdentifier(String sessionUniqueIdentifier, String senderId){
+
+        List<String> participants = getParticipantIDsFromUniqueIdentifier(sessionUniqueIdentifier);
+
+        for (String participantID : participants){
+            if (participantID.equals(senderId)) return participantID;
+        }
+
+        return "anonymousUser";
+    }
+
 }

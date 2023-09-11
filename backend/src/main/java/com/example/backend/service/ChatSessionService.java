@@ -99,8 +99,6 @@ public class ChatSessionService
      */
     public void addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
-        ChatSession session = addChatSession(participantOneId, participantTwoId);
-        session.chat_messages().add(msg);
     }
 
 
