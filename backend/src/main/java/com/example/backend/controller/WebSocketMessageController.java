@@ -1,6 +1,8 @@
 package com.example.backend.controller;
 
 import com.example.backend.model.ChatMessage;
+import com.example.backend.model.ChatMessageReceiveDTO;
+import com.example.backend.model.ChatSession;
 import com.example.backend.service.ChatSessionService;
 import com.example.backend.utilities.SessionIdentifierUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +21,28 @@ public class WebSocketMessageController {
     private ChatSessionService chatSessionService;
 
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessage chatMessage) {
+    public void processMessage(@Payload ChatMessageReceiveDTO chatMessageDto) {
+
+        ChatMessage chatMessageToAdd = new ChatMessage(
+                null,
+                chatMessageDto.senderId(),
+                chatMessageDto.recipientId(),
+                chatMessageDto.timestamp(),
+                chatMessageDto.content()
+        );
+
+        System.out.println(chatMessageToAdd);
+
+        chatSessionService
+                .addChatMessageToChatSession(
+                        chatMessageDto.senderId(),
+                        chatMessageDto.recipientId(),
+                        chatMessageToAdd
+                );
+
+        messagingTemplate.convertAndSendToUser(
+                chatMessageDto.recipientId(),"/queue/messages",
+                chatMessageToAdd);
 
         /*
         var chatId = chatRoomService

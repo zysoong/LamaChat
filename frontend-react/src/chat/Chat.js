@@ -15,7 +15,7 @@ import secureLocalStorage from "react-secure-storage";
 let stompClient = null;
 const Chat = (props) => {
 
-    const currentUser = useRecoilValue(loggedInUser);
+    const [currentUser, setCurrentUser] = useRecoilState(loggedInUser);
     const [text, setText] = useState("");
     const [sessionPartners, setSessionPartners] = useState([]);
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
@@ -65,7 +65,6 @@ const Chat = (props) => {
                     return findOrAddChatSessionByParticipantIds(activeSessionPartnerID, userId)
                 })
                 .then((chatSession) => {
-                    console.log("messages:::: alpha ->" + chatSession)
                     return chatSession.chat_messages
                 })
                 .then((messages) => {
@@ -84,6 +83,7 @@ const Chat = (props) => {
             .then((me) => {
                 return findUserByUserName(me)
             })
+            .then((user) => {setCurrentUser(user); return user;})
             .then((data) => {
                 stompClient.subscribe(
                     "/user/" + data.userId + "/queue/messages",
@@ -97,21 +97,20 @@ const Chat = (props) => {
     };
 
     const onMessageReceived = (msg) => {
-        console.log("msg:::: RECEIVED" +  msg)
+        console.log("Message Notification RECEIVED" +  msg)
+        // TODO Fetch user from the AuthService
+        // TODO Set messages
     };
 
     const sendMessage = (msg) => {
         if (msg.trim() !== "") {
             const message = {
-                senderId: currentUser.id,
-                recipientId: activeSessionPartnerID.id,
-                senderName: currentUser.name,
-                recipientName: activeSessionPartnerID.name,
-                content: msg,
+                senderId: currentUser.userId,
+                recipientId: activeSessionPartnerID,
                 timestamp: new Date(),
+                content: msg
             };
             stompClient.send("/app/chat", {}, JSON.stringify(message));
-
 
             // TODO do promise here: 1-> add msg locally  2. sync messages from remote
             const newMessages = [...messages];

@@ -88,32 +88,37 @@ public class ChatSessionService
             participantTwo.chat_sessions().add(addChatSession);
             appUserRepository.save(participantTwo);
 
+            return addChatSession;
+
+        } else {
+            return newChatSession;
         }
-        return newChatSession;
     }
 
     /**
      * Push a chat message to chat session.
-     * If the chat session does not exist, then create a new one with the "addChatSession" function
+     * If the chat session does not exist, then create a new one with the "addChatSession" function.
+     * Ignore the chatSession and messageId properties in the msg object.
      * @param participantOneId
      * @param participantTwoId
      * @param msg
      */
     public void addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
-        chatMessageRepository.save(msg);
 
-        addChatSession(participantOneId, participantTwoId);
-        String sessionUniqueIdentifier = SessionIdentifierUtilities.generateSessionUniqueIdentifier(participantOneId, participantTwoId);
+        ChatSession session = addChatSession(participantOneId, participantTwoId);
 
-        ChatSession sessionWithMsgToBeAttached = chatSessionRepository.findChatSessionByUniqueSessionIdentifier(
-                sessionUniqueIdentifier
-        ).orElseThrow(() -> new NoSuchElementException("[Internal error]Chat session with session ID " +
-            sessionUniqueIdentifier + "not found! "));
+        ChatMessage messageToBeSent = new ChatMessage(
+                null,
+                msg.senderId(),
+                msg.recipientId(),
+                msg.timestamp(),
+                msg.content()
+        );
 
-        sessionWithMsgToBeAttached.chat_messages().add(msg);
-
-        chatSessionRepository.save(sessionWithMsgToBeAttached);
+        ChatMessage messageSent = chatMessageRepository.save(messageToBeSent);
+        session.chat_messages().add(messageSent);
+        chatSessionRepository.save(session);
 
     }
 
