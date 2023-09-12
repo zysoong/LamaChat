@@ -31,18 +31,18 @@ public class WebSocketMessageController {
                 chatMessageDto.content()
         );
 
-        System.out.println(chatMessageToAdd);
-
-        chatSessionService
+        ChatMessage msgStored = chatSessionService
                 .addChatMessageToChatSession(
                         chatMessageDto.senderId(),
                         chatMessageDto.recipientId(),
                         chatMessageToAdd
                 );
 
+        System.out.println("[WS MSG]: " + msgStored);
+
         messagingTemplate.convertAndSendToUser(
                 chatMessageDto.recipientId(),"/queue/messages",
-                chatMessageToAdd);
+                msgStored);
 
         /*
         var chatId = chatRoomService

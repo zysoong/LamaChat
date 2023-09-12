@@ -3,10 +3,9 @@ import { Button } from "antd";
 import {
     getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts,
 } from "../util/ApiUtil";
-import { useRecoilValue, useRecoilState } from "recoil";
+import {  useRecoilState } from "recoil";
 import {
-    loggedInUser,
-    chatMessages,
+    loggedInUser
 } from "../atom/globalState";
 import ScrollToBottom from "react-scroll-to-bottom";
 import "./Chat.css";
@@ -21,13 +20,25 @@ const Chat = (props) => {
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
     const [messages, setMessages] = useState([]);
 
-    const connect = useCallback(() => {
-        const Stomp = require("stompjs");
-        let SockJS = require("sockjs-client");
-        SockJS = new SockJS("http://localhost:8080/ws");
-        stompClient = Stomp.over(SockJS);
-        stompClient.connect({}, onConnected, onError);
-    }, []);
+    const onMessageReceived = (msg) => {
+        setMessages(messages => [...messages, JSON.parse(msg.body)])
+    }
+
+    const onConnected = useCallback(() => {
+        console.log("connected");
+
+        getMe()
+            .then((me) => {
+                return findUserByUserName(me)
+            })
+            .then((user) => {setCurrentUser(user); return user;})
+            .then((data) => {
+                stompClient.subscribe(
+                    "/user/" + data.userId + "/queue/messages",
+                    onMessageReceived
+                );
+            })
+    }, [messages, setMessages, onMessageReceived, setCurrentUser]);
 
     const loadContacts = useCallback(() => {
         getMyContacts().then((users) => {
@@ -36,7 +47,41 @@ const Chat = (props) => {
                 setActiveSessionPartnerID(users[0].userId);
             }
         });
+    }, [activeSessionPartnerID]);
+
+
+    const connect = useCallback(() => {
+        const Stomp = require("stompjs");
+        let SockJS = require("sockjs-client");
+        SockJS = new SockJS("http://localhost:8080/ws");
+        stompClient = Stomp.over(SockJS);
+        stompClient.connect({}, onConnected, onError);
     }, []);
+
+    const onError = (err) => {
+        console.log(err);
+    };
+
+    const sendMessage = (msg) => {
+        if (msg.trim() !== "") {
+            const message = {
+                senderId: currentUser.userId,
+                recipientId: activeSessionPartnerID,
+                timestamp: new Date(),
+                content: msg
+            };
+            stompClient.send("/app/chat", {}, JSON.stringify(message));
+
+            // TODO do promise here: 1-> add msg locally  2. sync messages from remote
+            const newMessages = [...messages];
+            console.log(newMessages)
+            newMessages.push(message);
+            console.log(newMessages)
+            setMessages(newMessages);
+        }
+    };
+
+
 
     useEffect(() => {
         if (secureLocalStorage.getItem("accessToken") === null) {
@@ -45,7 +90,7 @@ const Chat = (props) => {
             connect();
             loadContacts();
         }
-    }, [props.history, loadContacts, connect]);
+    }, [props.history]);
 
     useEffect(() => {
 
@@ -69,83 +114,36 @@ const Chat = (props) => {
                 })
                 .then((messages) => {
                     setMessages(messages)
-                    console.log("messages:::: " + messages)
                 })
         }
     }, [activeSessionPartnerID, setMessages]);
-
-
-
-    const onConnected = () => {
-        console.log("connected");
-
-        getMe()
-            .then((me) => {
-                return findUserByUserName(me)
-            })
-            .then((user) => {setCurrentUser(user); return user;})
-            .then((data) => {
-                stompClient.subscribe(
-                    "/user/" + data.userId + "/queue/messages",
-                    onMessageReceived
-                );
-            })
-    };
-
-    const onError = (err) => {
-        console.log(err);
-    };
-
-    const onMessageReceived = (msg) => {
-        console.log("Message Notification RECEIVED" +  msg)
-        // TODO Fetch user from the AuthService
-        // TODO Set messages
-    };
-
-    const sendMessage = (msg) => {
-        if (msg.trim() !== "") {
-            const message = {
-                senderId: currentUser.userId,
-                recipientId: activeSessionPartnerID,
-                timestamp: new Date(),
-                content: msg
-            };
-            stompClient.send("/app/chat", {}, JSON.stringify(message));
-
-            // TODO do promise here: 1-> add msg locally  2. sync messages from remote
-            const newMessages = [...messages];
-            newMessages.push(message);
-            setMessages(newMessages);
-        }
-    };
-
 
 
     return (
         <div id="frame">
             <div id="sidepanel">
                 <div id="profile">
-                    <div class="wrap">
+                    <div className="wrap">
                         <img
                             id="profile-img"
                             src={currentUser.profilePicture}
-                            class="online"
+                            className="online"
                             alt=""
                         />
                         <p>{currentUser.name}</p>
                         <div id="status-options">
                             <ul>
-                                <li id="status-online" class="active">
-                                    <span class="status-circle"></span> <p>Online</p>
+                                <li id="status-online" className="active">
+                                    <span className="status-circle"></span> <p>Online</p>
                                 </li>
                                 <li id="status-away">
-                                    <span class="status-circle"></span> <p>Away</p>
+                                    <span className="status-circle"></span> <p>Away</p>
                                 </li>
                                 <li id="status-busy">
-                                    <span class="status-circle"></span> <p>Busy</p>
+                                    <span className="status-circle"></span> <p>Busy</p>
                                 </li>
                                 <li id="status-offline">
-                                    <span class="status-circle"></span> <p>Offline</p>
+                                    <span className="status-circle"></span> <p>Offline</p>
                                 </li>
                             </ul>
                         </div>
@@ -156,18 +154,19 @@ const Chat = (props) => {
                     <ul>
                         {sessionPartners.map((partner) => (
                             <li
-                                onClick={() => {setActiveSessionPartnerID(partner.userId); console.log("Active contact set: " + activeSessionPartnerID)}}
-                                class={
+                                key={partner.userId}
+                                onClick={() => {setActiveSessionPartnerID(partner.userId); }}
+                                className={
                                     activeSessionPartnerID && partner.userId === activeSessionPartnerID.userId
                                         ? "contact active"
                                         : "contact"
                                 }
                             >
-                                <div class="wrap">
-                                    <span class="contact-status online"></span>
+                                <div className="wrap">
+                                    <span className="contact-status online"></span>
                                     <img id={partner.userId} src={partner.profilePicture} alt="" />
-                                    <div class="meta">
-                                        <p class="name">{partner.userName}</p>
+                                    <div className="meta">
+                                        <p className="name">{partner.userName}</p>
 
                                     </div>
                                 </div>
@@ -177,34 +176,33 @@ const Chat = (props) => {
                 </div>
                 <div id="bottom-bar">
                     <button id="addcontact">
-                        <i class="fa fa-user fa-fw" aria-hidden="true"></i>{" "}
+                        <i className="fa fa-user fa-fw" aria-hidden="true"></i>{" "}
                         <span>Profile</span>
                     </button>
                     <button id="settings">
-                        <i class="fa fa-cog fa-fw" aria-hidden="true"></i>{" "}
+                        <i className="fa fa-cog fa-fw" aria-hidden="true"></i>{" "}
                         <span>Settings</span>
                     </button>
                 </div>
             </div>
-            <div class="content">
-                <div class="contact-profile">
+            <div className="content">
+                <div className="contact-profile">
                     <img src={activeSessionPartnerID && activeSessionPartnerID.profilePicture} alt="" />
                     <p>{activeSessionPartnerID}</p>
                 </div>
                 <ScrollToBottom className="messages">
                     <ul>
                         {messages.map((msg) => (
-                            <li class={msg.senderId === currentUser.id ? "sent" : "replies"}>
-                                {msg.senderId !== currentUser.id && (
-                                    <img src={activeSessionPartnerID.profilePicture} alt="" />
-                                )}
+                            <li
+                                key={msg.messageId}
+                                className={msg.senderId === currentUser.userId ? "sent" : "replies"}>
                                 <p>{msg.content}</p>
                             </li>
                         ))}
                     </ul>
                 </ScrollToBottom>
-                <div class="message-input">
-                    <div class="wrap">
+                <div className="message-input">
+                    <div className="wrap">
                         <input
                             name="user_input"
                             size="large"
@@ -220,7 +218,7 @@ const Chat = (props) => {
                         />
 
                         <Button
-                            icon={<i class="fa fa-paper-plane" aria-hidden="true"></i>}
+                            icon={<i className="fa fa-paper-plane" aria-hidden="true"></i>}
                             onClick={() => {
                                 sendMessage(text);
                                 setText("");

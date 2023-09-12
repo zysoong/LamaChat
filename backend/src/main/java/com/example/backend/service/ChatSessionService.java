@@ -103,7 +103,7 @@ public class ChatSessionService
      * @param participantTwoId
      * @param msg
      */
-    public void addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
+    public ChatMessage addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
 
         ChatSession session = addChatSession(participantOneId, participantTwoId);
@@ -119,6 +119,8 @@ public class ChatSessionService
         ChatMessage messageSent = chatMessageRepository.save(messageToBeSent);
         session.chat_messages().add(messageSent);
         chatSessionRepository.save(session);
+
+        return messageSent;
 
     }
 
