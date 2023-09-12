@@ -43,28 +43,6 @@ public class WebSocketMessageController {
         messagingTemplate.convertAndSendToUser(
                 chatMessageDto.recipientId(),"/queue/messages",
                 msgStored);
-
-        /*
-        var chatId = chatRoomService
-                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true);
-        chatMessage.setChatId(chatId.get());
-
-        chatSessionService.addChatMessageToChatSession(
-                chatMessage.senderId(),
-                SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(
-                        chatMessage.chatSession().uniqueSessionIdentifier(),
-                        chatMessage.senderId()
-                ),
-                chatMessage
-        );
-
-        ChatMessage saved = chatMessageService.save(chatMessage);
-        messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(),"/queue/messages",
-                new ChatNotification(
-                        saved.getId(),
-                        saved.getSenderId(),
-                        saved.getSenderName()));*/
     }
 
 }
