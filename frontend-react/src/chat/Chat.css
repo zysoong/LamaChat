@@ -605,7 +605,7 @@ span.status-circle:before {
 }
 #frame .content .messages {
     height: 600px;
-    min-height: calc(100% - 93px);
+    min-height: calc(95% - 93px);
     max-height: calc(100% - 93px);
     overflow-y: scroll;
     overflow-x: hidden;

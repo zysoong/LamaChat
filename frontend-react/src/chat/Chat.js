@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from "react";
 import { Button } from "antd";
 import {
-    getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts,
+    getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts, logout,
 } from "../util/ApiUtil";
 import {  useRecoilState } from "recoil";
 import {
@@ -10,6 +10,7 @@ import {
 import ScrollToBottom from "react-scroll-to-bottom";
 import "./Chat.css";
 import secureLocalStorage from "react-secure-storage";
+import {createImageFromInitials, getRandomColor} from "../util/ImageUtil";
 
 let stompClient = null;
 const Chat = (props) => {
@@ -20,9 +21,9 @@ const Chat = (props) => {
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
     const [messages, setMessages] = useState([]);
 
-    const onMessageReceived = (msg) => {
+    const onMessageReceived = useCallback((msg) => {
         setMessages(messages => [...messages, JSON.parse(msg.body)])
-    }
+    }, [])
 
     const onConnected = useCallback(() => {
         console.log("connected");
@@ -38,7 +39,7 @@ const Chat = (props) => {
                     onMessageReceived
                 );
             })
-    }, [messages, setMessages, onMessageReceived, setCurrentUser]);
+    }, [ onMessageReceived, setCurrentUser]);
 
     const loadContacts = useCallback(() => {
         getMyContacts().then((users) => {
@@ -59,7 +60,14 @@ const Chat = (props) => {
     }, []);
 
     const onError = (err) => {
-        console.log(err);
+        const errMsg = "[ERROR]" + err
+        console.log(errMsg)
+        if (errMsg.includes("Lost connection"))
+        {
+            connect();
+            loadContacts();
+        }
+
     };
 
     const sendMessage = (msg) => {
@@ -74,13 +82,18 @@ const Chat = (props) => {
 
             // TODO do promise here: 1-> add msg locally  2. sync messages from remote
             const newMessages = [...messages];
-            console.log(newMessages)
             newMessages.push(message);
-            console.log(newMessages)
             setMessages(newMessages);
         }
     };
 
+    const logoutOnClick = () => {
+        logout().then(() => {
+            secureLocalStorage.removeItem("accessToken");
+            secureLocalStorage.removeItem("loggedUser");
+            props.history.push("/");
+        })
+    };
 
 
     useEffect(() => {
@@ -126,27 +139,11 @@ const Chat = (props) => {
                     <div className="wrap">
                         <img
                             id="profile-img"
-                            src={currentUser.profilePicture}
+                            src={createImageFromInitials(500, currentUser.userName, getRandomColor())}
                             className="online"
                             alt=""
                         />
-                        <p>{currentUser.name}</p>
-                        <div id="status-options">
-                            <ul>
-                                <li id="status-online" className="active">
-                                    <span className="status-circle"></span> <p>Online</p>
-                                </li>
-                                <li id="status-away">
-                                    <span className="status-circle"></span> <p>Away</p>
-                                </li>
-                                <li id="status-busy">
-                                    <span className="status-circle"></span> <p>Busy</p>
-                                </li>
-                                <li id="status-offline">
-                                    <span className="status-circle"></span> <p>Offline</p>
-                                </li>
-                            </ul>
-                        </div>
+                        <p>{"Welcome to LamaChat, " + currentUser.userName + " !"}</p>
                     </div>
                 </div>
                 <div id="search" />
@@ -157,17 +154,16 @@ const Chat = (props) => {
                                 key={partner.userId}
                                 onClick={() => {setActiveSessionPartnerID(partner.userId); }}
                                 className={
-                                    activeSessionPartnerID && partner.userId === activeSessionPartnerID.userId
+                                    activeSessionPartnerID && partner.userId === activeSessionPartnerID
                                         ? "contact active"
                                         : "contact"
                                 }
                             >
                                 <div className="wrap">
                                     <span className="contact-status online"></span>
-                                    <img id={partner.userId} src={partner.profilePicture} alt="" />
+                                    <img id={partner.userId} src={createImageFromInitials(500, partner.userName, getRandomColor())} alt="" />
                                     <div className="meta">
                                         <p className="name">{partner.userName}</p>
-
                                     </div>
                                 </div>
                             </li>
@@ -176,12 +172,12 @@ const Chat = (props) => {
                 </div>
                 <div id="bottom-bar">
                     <button id="addcontact">
-                        <i className="fa fa-user fa-fw" aria-hidden="true"></i>{" "}
-                        <span>Profile</span>
+                        <i className="fa fa-plus fa-fw" aria-hidden="true"></i>{" "}
+                        <span>Add</span>
                     </button>
-                    <button id="settings">
-                        <i className="fa fa-cog fa-fw" aria-hidden="true"></i>{" "}
-                        <span>Settings</span>
+                    <button id="settings" onClick={logoutOnClick}>
+                        <i className="fa fa-sign-out fa-fw" aria-hidden="true"></i>{" "}
+                        <span>Logout</span>
                     </button>
                 </div>
             </div>
@@ -192,9 +188,9 @@ const Chat = (props) => {
                 </div>
                 <ScrollToBottom className="messages">
                     <ul>
-                        {messages.map((msg) => (
+                        {messages.map((msg, i) => (
                             <li
-                                key={msg.messageId}
+                                key={i}
                                 className={msg.senderId === currentUser.userId ? "sent" : "replies"}>
                                 <p>{msg.content}</p>
                             </li>

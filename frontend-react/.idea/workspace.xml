@@ -5,9 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bffc7e67-d0f5-427b-b9b8-74a202994828" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/example/backend/controller/WebSocketMessageController.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/example/backend/controller/WebSocketMessageController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../backend/src/main/java/com/example/backend/service/ChatSessionService.java" beforeDir="false" afterPath="$PROJECT_DIR$/../backend/src/main/java/com/example/backend/service/ChatSessionService.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/util/ImageUtil.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/chat/Chat.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/chat/Chat.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/chat/Chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/chat/Chat.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -64,7 +64,7 @@
       <updated>1694349805082</updated>
       <workItem from="1694349806118" duration="4679000" />
       <workItem from="1694440260454" duration="7138000" />
-      <workItem from="1694461047934" duration="25973000" />
+      <workItem from="1694461047934" duration="30310000" />
     </task>
     <servers />
   </component>
