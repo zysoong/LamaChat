@@ -183,8 +183,7 @@ const Chat = (props) => {
             </div>
             <div className="content">
                 <div className="contact-profile">
-                    <img src={activeSessionPartnerID && activeSessionPartnerID.profilePicture} alt="" />
-                    <p>{activeSessionPartnerID}</p>
+                    <p>{}</p>
                 </div>
                 <ScrollToBottom className="messages">
                     <ul>

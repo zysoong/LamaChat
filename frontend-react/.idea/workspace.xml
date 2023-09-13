@@ -5,10 +5,11 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bffc7e67-d0f5-427b-b9b8-74a202994828" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/util/ImageUtil.js" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/signin/lama.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/chat/Chat.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/chat/Chat.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/chat/Chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/chat/Chat.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/signin/SignIn.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/signin/SignIn.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/signin/Signin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/signin/Signin.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -29,22 +30,29 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;WebServerToolWindowFactoryState&quot;: &quot;false&quot;,
-    &quot;javascript.nodejs.core.library.configured.version&quot;: &quot;18.15.0&quot;,
-    &quot;javascript.nodejs.core.library.typings.version&quot;: &quot;18.15.0&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_interpreter_path&quot;: &quot;C:/Users/evicm/AppData/Roaming/JetBrains/WebStorm2023.2/node/node-v18.15.0-win-x64/node&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "javascript.nodejs.core.library.configured.version": "18.15.0",
+    "javascript.nodejs.core.library.typings.version": "18.15.0",
+    "last_opened_file_path": "D:/Project/LamaChat/frontend-react/src/signin",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_interpreter_path": "C:/Users/evicm/AppData/Roaming/JetBrains/WebStorm2023.2/node/node-v18.15.0-win-x64/node",
+    "nodejs_package_manager_path": "npm",
+    "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2023.2.1\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
+    "vue.rearranger.settings.migration": "true"
   }
-}</component>
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Project\LamaChat\frontend-react\src\signin" />
+    </key>
+  </component>
   <component name="RunManager">
     <configuration name="start" type="js.build_tools.npm" nameIsGenerated="true">
       <package-json value="$PROJECT_DIR$/package.json" />
@@ -64,7 +72,7 @@
       <updated>1694349805082</updated>
       <workItem from="1694349806118" duration="4679000" />
       <workItem from="1694440260454" duration="7138000" />
-      <workItem from="1694461047934" duration="30310000" />
+      <workItem from="1694461047934" duration="33383000" />
     </task>
     <servers />
   </component>

@@ -4,6 +4,7 @@ import {DingtalkOutlined, LockOutlined, UserOutlined,} from "@ant-design/icons";
 import {loginWithToken} from "../util/ApiUtil";
 import "./Signin.css";
 import secureLocalStorage from "react-secure-storage";
+import logo from './lama.png'
 
 
 const SignIn = (props) => {
@@ -76,7 +77,8 @@ const SignIn = (props) => {
 
     return (
         <div className="login-container">
-            <DingtalkOutlined style={{fontSize: 50}}/>
+            <img src={logo} alt="Logo" className="logo" />
+            <h1 className="title">LamaChat</h1>
             <Form
                 name="normal_login"
                 className="login-form"
@@ -117,8 +119,6 @@ const SignIn = (props) => {
                 </Form.Item>
                 <Divider>OR</Divider>
                 Not a member yet? <a href="/signup">Sign up</a>
-                <Divider>OR</Divider>
-                Test: <a href="/test">Test</a>
             </Form>
         </div>
     );

@@ -25,3 +25,14 @@
   color: white !important;
   font-weight: 700 !important;
 }
+
+.logo {
+  max-width: 50px; /* Limit the logo size */
+  margin-right: 15px; /* Add some spacing between the logo and title */
+}
+
+.title {
+  font-size: 24px; /* Adjust the font size of the title */
+  margin-right: 15px;
+  line-height: 1; /* Ensure the title is centered vertically */
+}
