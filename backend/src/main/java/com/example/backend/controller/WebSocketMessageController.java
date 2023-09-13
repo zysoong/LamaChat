@@ -1,6 +1,8 @@
 package com.example.backend.controller;
 
 import com.example.backend.model.ChatMessage;
+import com.example.backend.model.ChatMessageReceiveDTO;
+import com.example.backend.model.ChatSession;
 import com.example.backend.service.ChatSessionService;
 import com.example.backend.utilities.SessionIdentifierUtilities;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,29 +21,28 @@ public class WebSocketMessageController {
     private ChatSessionService chatSessionService;
 
     @MessageMapping("/chat")
-    public void processMessage(@Payload ChatMessage chatMessage) {
+    public void processMessage(@Payload ChatMessageReceiveDTO chatMessageDto) {
 
-        /*
-        var chatId = chatRoomService
-                .getChatId(chatMessage.getSenderId(), chatMessage.getRecipientId(), true);
-        chatMessage.setChatId(chatId.get());
-
-        chatSessionService.addChatMessageToChatSession(
-                chatMessage.senderId(),
-                SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(
-                        chatMessage.chatSession().uniqueSessionIdentifier(),
-                        chatMessage.senderId()
-                ),
-                chatMessage
+        ChatMessage chatMessageToAdd = new ChatMessage(
+                null,
+                chatMessageDto.senderId(),
+                chatMessageDto.recipientId(),
+                chatMessageDto.timestamp(),
+                chatMessageDto.content()
         );
 
-        ChatMessage saved = chatMessageService.save(chatMessage);
+        ChatMessage msgStored = chatSessionService
+                .addChatMessageToChatSession(
+                        chatMessageDto.senderId(),
+                        chatMessageDto.recipientId(),
+                        chatMessageToAdd
+                );
+
+        System.out.println("[WS MSG]: " + msgStored);
+
         messagingTemplate.convertAndSendToUser(
-                chatMessage.getRecipientId(),"/queue/messages",
-                new ChatNotification(
-                        saved.getId(),
-                        saved.getSenderId(),
-                        saved.getSenderName()));*/
+                chatMessageDto.recipientId(),"/queue/messages",
+                msgStored);
     }
 
 }

@@ -11,10 +11,10 @@ import java.util.List;
 @Document(collection = "chat_sessions")
 public record ChatSession(
     @MongoId
-    String ChatSessionId,
+    String chatSessionId,
     @Indexed(unique = true, name = "_unique_session_identifier_")
     String uniqueSessionIdentifier,
-    @DBRef
+    @DBRef (lazy = true)
     @JsonIgnoreProperties("chatSession")
     List<ChatMessage> chat_messages
 

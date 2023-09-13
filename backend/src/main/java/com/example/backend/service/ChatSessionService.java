@@ -2,6 +2,7 @@ package com.example.backend.service;
 
 import com.example.backend.model.ChatMessage;
 import com.example.backend.model.ChatSession;
+import com.example.backend.repository.ChatMessageRepository;
 import com.example.backend.repository.ChatSessionRepository;
 import com.example.backend.security.AppUser;
 import com.example.backend.security.AppUserRepository;
@@ -20,6 +21,7 @@ public class ChatSessionService
 {
     private final ChatSessionRepository chatSessionRepository;
     private final AppUserRepository appUserRepository;
+    private final ChatMessageRepository chatMessageRepository;
 
     public ChatSession getChatSession(String participantOneId, String participantTwoId)
     {
@@ -86,19 +88,40 @@ public class ChatSessionService
             participantTwo.chat_sessions().add(addChatSession);
             appUserRepository.save(participantTwo);
 
+            return addChatSession;
+
+        } else {
+            return newChatSession;
         }
-        return newChatSession;
     }
 
     /**
      * Push a chat message to chat session.
-     * If the chat session does not exist, then create a new one with the "addChatSession" function
+     * If the chat session does not exist, then create a new one with the "addChatSession" function.
+     * Ignore the chatSession and messageId properties in the msg object.
      * @param participantOneId
      * @param participantTwoId
      * @param msg
      */
-    public void addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
+    public ChatMessage addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
+
+        ChatSession session = addChatSession(participantOneId, participantTwoId);
+
+        ChatMessage messageToBeSent = new ChatMessage(
+                null,
+                msg.senderId(),
+                msg.recipientId(),
+                msg.timestamp(),
+                msg.content()
+        );
+
+        ChatMessage messageSent = chatMessageRepository.save(messageToBeSent);
+        session.chat_messages().add(messageSent);
+        chatSessionRepository.save(session);
+
+        return messageSent;
+
     }
 
 
