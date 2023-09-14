@@ -38,6 +38,7 @@ public class ChatViewController {
 
         List<AppUser> myContacts = ChatViewService.getInstance().getMyContacts();
         List<String> namesOfMyContacts = new ArrayList<>();
+        String myId = ChatViewService.getInstance().getMeAsUserObject().userId();
 
         for (AppUser contact : myContacts){
             namesOfMyContacts.add(contact.userName());
@@ -51,12 +52,20 @@ public class ChatViewController {
             ChatSession firstChatSession = ChatViewService
                     .getInstance()
                     .findOrAddChatSessionByParticipantIds(
-                            ChatViewService.getInstance().getMeAsUserObject().userId(),
+                            myId,
                             myContacts.get(0).userId()
                     );
 
-            for (ChatMessage msg : firstChatSession.chat_messages()){
-                chatContentList_LV.getItems().add(msg.senderId() + ": " + msg.content());
+            for (ChatMessage msg : firstChatSession.chat_messages())
+            {
+                if (msg.senderId().equals(myId))
+                {
+                    chatContentList_LV.getItems().add("me : " + msg.content());
+                }
+                else
+                {
+                    chatContentList_LV.getItems().add(myContacts.get(0).userName() + ": " + msg.content());
+                }
             }
         }
 
