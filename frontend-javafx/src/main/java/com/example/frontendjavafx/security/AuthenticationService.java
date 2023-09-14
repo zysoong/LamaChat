@@ -18,7 +18,7 @@ public class AuthenticationService {
 
     private final HttpClient client = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private String STUDENTS_URL_BACKEND = System.getenv("BACKEND_STUDENT_URI");
+    private String URL_BACKEND = System.getenv("BACKEND_URI");
 
     private static AuthenticationService INSTANCE;
 
@@ -35,7 +35,7 @@ public class AuthenticationService {
 
     public boolean login(String username, String password) {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(STUDENTS_URL_BACKEND + "/api/auth/login"))
+                .uri(URI.create(URL_BACKEND + "/api/auth/login"))
                 .POST(HttpRequest.BodyPublishers.ofString(""))
                 .header("Authorization", "Basic " + Base64.getEncoder().encodeToString((username + ":" + password).getBytes()))
                 .build();
@@ -48,7 +48,7 @@ public class AuthenticationService {
 
     public boolean logout() {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(STUDENTS_URL_BACKEND + "/api/users/logout"))
+                .uri(URI.create(URL_BACKEND + "/api/users/logout"))
                 .POST(HttpRequest.BodyPublishers.ofString(""))
                 .header("Cookie", "JSESSIONID=" + sessionId)
                 .build();
@@ -81,6 +81,14 @@ public class AuthenticationService {
                 setErrorMessage("Something went wrong");
             }
             return false;
+        }
+    }
+
+    private AppUser mapToAppUser(String responseBody) {
+        try {
+            return objectMapper.readValue(responseBody, AppUser.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
         }
     }
 

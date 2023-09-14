@@ -1,9 +1,9 @@
 package com.example.frontendjavafx.controller;
 
 import com.example.frontendjavafx.security.AuthenticationService;
+import com.example.frontendjavafx.service.SceneSwitchService;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 
@@ -20,7 +20,7 @@ public class LoginController {
     @FXML
     private PasswordField password_TF;
 
-    private String STUDENTS_URL_BACKEND = System.getenv("BACKEND_STUDENT_URI");
+    private String STUDENTS_URL_BACKEND = System.getenv("BACKEND_URI");
 
     public void initialize() {
     }
@@ -53,9 +53,8 @@ public class LoginController {
             String body = response.join().body();
 
             if (statusCode==200 && response.join().body().length() > 0) {
-                //SceneSwitchService.getInstance().switchToStudentView(event);
+                SceneSwitchService.getInstance().switchToChatView(event);
                 System.out.println("Hi! " + response.join().body());
-                System.out.println("LOGIN SUCCESSFUL! Will jump to chat view! --> Newflash: won't! ");
             } else {
                 System.out.println("LOGIN FAILED! PROBABLY ROLE INCORRECT OR INTERNAL SERVER ERROR");
                 System.out.println("Status Code: " + statusCode);

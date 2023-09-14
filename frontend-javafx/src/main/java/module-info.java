@@ -16,5 +16,11 @@ module com.example.frontendjavafx {
     opens com.example.frontendjavafx.controller;
     exports com.example.frontendjavafx.controller;
 
+    opens com.example.frontendjavafx.model;
+    exports com.example.frontendjavafx.model;
+
+    opens com.example.frontendjavafx.service;
+    exports com.example.frontendjavafx.service;
+
 
 }
