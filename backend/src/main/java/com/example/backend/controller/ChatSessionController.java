@@ -18,7 +18,7 @@ public class ChatSessionController {
     @ResponseStatus(HttpStatus.CREATED)
     public ChatSession addChatSession(@PathVariable("participantOneId") String participantOneId, @PathVariable("participantTwoId") String participantTwoId)
     {
-        return chatSessionService.addChatSession(participantOneId, participantTwoId);
+        return chatSessionService.addChatSessionOverride(participantOneId, participantTwoId);
     }
 
     @PostMapping("message/{participantOneId}/{participantTwoId}")

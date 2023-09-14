@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -40,16 +39,7 @@ public class ChatSessionService
                 .orElseThrow(() -> new NoSuchElementException("Session with Id " + sessionIdentifier + " was not found. "));
     }
 
-    /**
-     * Create a new chat session with empty message list.
-     * If one of the participants not exists, then throw NoSuchElementException.
-     * If chat session already exists, do nothing, otherwise create a new chat session in DB and assign it to the
-     *session lists of both participants
-     * @param participantOneId
-     * @param participantTwoId
-     * @return
-     */
-    public ChatSession addChatSession(String participantOneId, String participantTwoId)
+    public ChatSession addChatSessionOverride(String participantOneId, String participantTwoId)
     {
 
         AppUser participantOne = appUserRepository
@@ -95,18 +85,10 @@ public class ChatSessionService
         }
     }
 
-    /**
-     * Push a chat message to chat session.
-     * If the chat session does not exist, then create a new one with the "addChatSession" function.
-     * Ignore the chatSession and messageId properties in the msg object.
-     * @param participantOneId
-     * @param participantTwoId
-     * @param msg
-     */
     public ChatMessage addChatMessageToChatSession(String participantOneId, String participantTwoId, ChatMessage msg)
     {
 
-        ChatSession session = addChatSession(participantOneId, participantTwoId);
+        ChatSession session = addChatSessionOverride(participantOneId, participantTwoId);
 
         ChatMessage messageToBeSent = new ChatMessage(
                 null,
