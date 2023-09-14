@@ -1,5 +1,6 @@
 /.idea/
 *.iml
+*.class
 /backend/.mvn/
 /backend/mvnw
 /backend/mvnw.cmd
