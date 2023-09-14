@@ -5,11 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="bffc7e67-d0f5-427b-b9b8-74a202994828" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/src/signin/lama.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/chat/Chat.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/chat/Chat.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/signin/SignIn.js" beforeDir="false" afterPath="$PROJECT_DIR$/src/signin/SignIn.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/signin/Signin.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/signin/Signin.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,13 +33,14 @@
     "WebServerToolWindowFactoryState": "false",
     "javascript.nodejs.core.library.configured.version": "18.15.0",
     "javascript.nodejs.core.library.typings.version": "18.15.0",
-    "last_opened_file_path": "D:/Project/LamaChat/frontend-react/src/signin",
+    "last_opened_file_path": "D:/Project/LamaChat/frontend-react/src",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_interpreter_path": "C:/Users/evicm/AppData/Roaming/JetBrains/WebStorm2023.2/node/node-v18.15.0-win-x64/node",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.lookFeel",
     "ts.external.directory.path": "C:\\Program Files\\JetBrains\\WebStorm 2023.2.1\\plugins\\javascript-impl\\jsLanguageServicesImpl\\external",
     "vue.rearranger.settings.migration": "true"
   }
@@ -73,6 +70,8 @@
       <workItem from="1694349806118" duration="4679000" />
       <workItem from="1694440260454" duration="7138000" />
       <workItem from="1694461047934" duration="33383000" />
+      <workItem from="1694686647950" duration="43000" />
+      <workItem from="1694686692349" duration="196000" />
     </task>
     <servers />
   </component>
