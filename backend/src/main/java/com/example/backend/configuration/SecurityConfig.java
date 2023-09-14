@@ -31,24 +31,9 @@ public class SecurityConfig {
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(customizer -> {
                     customizer.requestMatchers(HttpMethod.GET, "").permitAll();
-                    /*customizer.requestMatchers(HttpMethod.POST, "/api/auth/**").permitAll();
-                    customizer.requestMatchers(HttpMethod.POST, "/api/students/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.PUT, "/api/students/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.GET, "/api/students/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.DELETE, "/api/students/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.POST, "/api/teachers/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.PUT, "/api/teachers/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.GET, "/api/teachers/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.DELETE, "/api/teachers/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.POST, "/api/courses/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.PUT, "/api/courses/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.GET, "/api/courses/**").authenticated();
-                    customizer.requestMatchers(HttpMethod.DELETE, "/api/courses/**").authenticated();*/
                     customizer.anyRequest().permitAll();
                 })
                 .httpBasic(Customizer.withDefaults())
-                //.formLogin(AbstractHttpConfigurer::disable)
-                //.logout(Customizer.withDefaults())
                 .build();
     }
 

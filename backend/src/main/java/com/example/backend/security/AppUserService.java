@@ -21,8 +21,6 @@ public class AppUserService implements UserDetailsService {
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
 
-    // "Username" == How will the app being authenticated (loginName/email)
-    // parameter always "username"
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         AppUser user = appUserRepository.findAppUserByUserName(username).orElseThrow(() -> new UsernameNotFoundException("User not found"));
