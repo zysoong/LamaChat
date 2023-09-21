@@ -19,7 +19,7 @@
          <children>
             <ListView fx:id="chatContentList_LV" layoutX="14.0" layoutY="39.0" prefHeight="248.0" prefWidth="383.0" />
             <TextArea fx:id="sendChatContent_TV" layoutX="14.0" layoutY="300.0" prefHeight="84.0" prefWidth="296.0" />
-            <Button fx:id="sendButton_B" layoutX="321.0" layoutY="300.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="77.0" text="Send" />
+            <Button fx:id="sendButton_B" layoutX="321.0" layoutY="300.0" mnemonicParsing="false" prefHeight="84.0" prefWidth="77.0" text="Send" onAction="#onClick_send"/>
          </children></AnchorPane>
   </items>
 </SplitPane>
