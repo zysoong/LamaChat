@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React, {useCallback, useEffect, useRef, useState} from "react";
 import { Button } from "antd";
 import {
     getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts, logout,
@@ -20,12 +20,23 @@ const Chat = (props) => {
     const [sessionPartners, setSessionPartners] = useState([]);
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
     const [messages, setMessages] = useState([]);
+    const isExistingContact = useRef(false)
+
+    useEffect( () => {
+        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
+    }, [activeSessionPartnerID] )
 
     const onMessageReceived = useCallback((msg) => {
+        if (!isExistingContact.current)
+        {
+            console.log(sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
+            loadContacts()
+        }
         setMessages(messages => [...messages, JSON.parse(msg.body)])
-    }, [])
+    }, [activeSessionPartnerID])
 
-    const onConnected = useCallback(() => {
+    const onConnected = () => {
+
         console.log("connected");
 
         getMe()
@@ -39,25 +50,25 @@ const Chat = (props) => {
                     onMessageReceived
                 );
             })
-    }, [ onMessageReceived, setCurrentUser]);
+    };
 
-    const loadContacts = useCallback(() => {
+    const loadContacts = () => {
         getMyContacts().then((users) => {
             setSessionPartners(users);
             if (activeSessionPartnerID === undefined && users.length > 0) {
                 setActiveSessionPartnerID(users[0].userId);
             }
         });
-    }, [activeSessionPartnerID]);
+    };
 
 
-    const connect = useCallback(() => {
+    const connect = () => {
         const Stomp = require("stompjs");
         let SockJS = require("sockjs-client");
         SockJS = new SockJS("http://localhost:8080/ws");
         stompClient = Stomp.over(SockJS);
         stompClient.connect({}, onConnected, onError);
-    }, []);
+    };
 
     const onError = (err) => {
         const errMsg = "[ERROR]" + err
@@ -67,7 +78,6 @@ const Chat = (props) => {
             connect();
             loadContacts();
         }
-
     };
 
     const sendMessage = (msg) => {
@@ -112,6 +122,7 @@ const Chat = (props) => {
             return;
         }
         else {
+
             getMe()
                 .then((me) => {
                     return findUserByUserName(me)

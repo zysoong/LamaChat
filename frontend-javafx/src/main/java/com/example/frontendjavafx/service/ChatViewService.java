@@ -63,6 +63,22 @@ public class ChatViewService {
         return result;
     }
 
+    public AppUser getUserByUserName(String userName){
+
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(URL_BACKEND + "/api/auth/" + userName))
+                .GET()
+                .header("Cookie", "JSESSIONID=" + AuthenticationService.getInstance().getSessionId())
+                .build();
+
+        AppUser result = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+                .thenApply(HttpResponse::body)
+                .thenApply(responseBody -> mapToAppUser(responseBody))
+                .join();
+
+        return result;
+    }
+
     public ChatSession findOrAddChatSessionByParticipantIds(String participantOneId, String participantTwoId){
 
         HttpRequest request = HttpRequest.newBuilder()
@@ -89,8 +105,7 @@ public class ChatViewService {
 
     private List<AppUser> mapToUserList(String responseBody) {
         try {
-            return objectMapper.readValue(responseBody, new TypeReference<>() {
-            });
+            return objectMapper.readValue(responseBody, new TypeReference<>() {});
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
