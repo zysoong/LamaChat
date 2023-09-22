@@ -6,6 +6,7 @@ import com.example.frontendjavafx.model.ChatSession;
 import com.example.frontendjavafx.security.AppUser;
 import com.example.frontendjavafx.service.ChatViewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
@@ -58,6 +59,7 @@ public class ChatViewController {
     private Map<String, String> mapFromUsernameToUserId = new HashMap<>();
     private Map<String, String> mapFromUserIdToUserName = new HashMap<>();
     private String myId;
+    private String selectedUserId;
 
 
     public void initialize() {
@@ -75,8 +77,8 @@ public class ChatViewController {
                 .addListener((observable, oldValue, newValue) ->
                 {
                     if (newValue != null) {
-                        String id = ChatViewService.getInstance().getUserByUserName(newValue).userId();
-                        changeChatPartner(id);
+                        selectedUserId = ChatViewService.getInstance().getUserByUserName(newValue).userId();
+                        changeChatPartner(selectedUserId);
                     }
                 });
 
@@ -122,9 +124,17 @@ public class ChatViewController {
                 }
 
                 System.out.println("Received: " + msgReceived);
-                String partnerName = mapFromUserIdToUserName.get(msgReceived.senderId());
-                chatContentList_LV.getItems().add(partnerName + ": " + msgReceived.content());
+                String rcvMessageSenderName = mapFromUserIdToUserName.get(msgReceived.senderId());
+                String selectedPartnerName = mapFromUserIdToUserName.get(selectedUserId);
 
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (rcvMessageSenderName == selectedPartnerName){
+                            chatContentList_LV.getItems().add(rcvMessageSenderName + ": " + msgReceived.content());
+                        }
+                    }
+                });
             }
         };
 
@@ -137,6 +147,8 @@ public class ChatViewController {
 
 
     private void changeChatPartner(String partnerUserId){
+
+        String partnerName = mapFromUserIdToUserName.get(partnerUserId);
 
         chatContentList_LV.getItems().clear();
 
@@ -155,7 +167,7 @@ public class ChatViewController {
             }
             else
             {
-                chatContentList_LV.getItems().add(myContacts.get(0).userName() + ": " + msg.content());
+                chatContentList_LV.getItems().add(partnerName + ": " + msg.content());
             }
         }
     }
