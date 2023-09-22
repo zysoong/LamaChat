@@ -6,30 +6,26 @@ import com.example.frontendjavafx.model.ChatSession;
 import com.example.frontendjavafx.security.AppUser;
 import com.example.frontendjavafx.service.ChatViewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.text.Text;
-import org.json.JSONObject;
 
 import org.springframework.messaging.simp.stomp.StompCommand;
 import org.springframework.messaging.simp.stomp.StompHeaders;
 import org.springframework.messaging.simp.stomp.StompSession;
 import org.springframework.web.socket.client.standard.StandardWebSocketClient;
 import org.springframework.web.socket.messaging.WebSocketStompClient;
-import org.springframework.web.socket.sockjs.client.RestTemplateXhrTransport;
 import org.springframework.web.socket.sockjs.client.SockJsClient;
 import org.springframework.web.socket.sockjs.client.Transport;
 import org.springframework.web.socket.sockjs.client.WebSocketTransport;
 import org.springframework.messaging.simp.stomp.StompSessionHandler;
 
-
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.net.URISyntaxException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,71 +39,46 @@ public class ChatViewController {
 
     @FXML
     private ListView<String> sessionList_LV;
-
     @FXML
     private Text welcomeText_T;
-
     @FXML
     private Button logoutButton_B;
-
     @FXML
     private ListView<String> chatContentList_LV;
-
     @FXML
     private TextArea sendChatContent_TV;
-
     @FXML
-    private Button sendButton_B;
-
-    private String URL_BACKEND = System.getenv("BACKEND_URI");
+    private TextField addUser_TF;
 
     private StompSession stompSession;
-
     private ObjectMapper objectMapper = new ObjectMapper();
 
     private List<AppUser> myContacts;
+    private List<String> namesOfMyContacts;
+    private Map<String, String> mapFromUsernameToUserId = new HashMap<>();
+    private Map<String, String> mapFromUserIdToUserName = new HashMap<>();
+    private String myId;
+
 
     public void initialize() {
 
-        this.myContacts = ChatViewService.getInstance().getMyContacts();
-        List<String> namesOfMyContacts = new ArrayList<>();
-        Map<String, String> mapFromUsernameToUserId = new HashMap<>();
-        Map<String, String> mapFromUserIdToUserName = new HashMap<>();
-
-        String myId = ChatViewService.getInstance().getMeAsUserObject().userId();
-
-        for (AppUser contact : myContacts){
-            namesOfMyContacts.add(contact.userName());
-            mapFromUsernameToUserId.put(contact.userName(), contact.userId());
-            mapFromUserIdToUserName.put(contact.userId(), contact.userName());
-        }
-
-        sessionList_LV.getItems().addAll(namesOfMyContacts);
-
-
+        updateSessionList();
 
         if (myContacts.size() > 0)
         {
-
-            ChatSession firstChatSession = ChatViewService
-                    .getInstance()
-                    .findOrAddChatSessionByParticipantIds(
-                            myId,
-                            myContacts.get(0).userId()
-                    );
-
-            for (ChatMessage msg : firstChatSession.chat_messages())
-            {
-                if (msg.senderId().equals(myId))
-                {
-                    chatContentList_LV.getItems().add("me : " + msg.content());
-                }
-                else
-                {
-                    chatContentList_LV.getItems().add(myContacts.get(0).userName() + ": " + msg.content());
-                }
-            }
+            changeChatPartner(myContacts.get(0).userId());
         }
+
+        sessionList_LV
+                .getSelectionModel()
+                .selectedItemProperty()
+                .addListener((observable, oldValue, newValue) ->
+                {
+                    if (newValue != null) {
+                        String id = ChatViewService.getInstance().getUserByUserName(newValue).userId();
+                        changeChatPartner(id);
+                    }
+                });
 
         String serverUrl = "http://localhost:8080/ws";
 
@@ -164,19 +135,62 @@ public class ChatViewController {
 
     }
 
+
+    private void changeChatPartner(String partnerUserId){
+
+        chatContentList_LV.getItems().clear();
+
+        ChatSession selectedChatSession = ChatViewService
+                .getInstance()
+                .findOrAddChatSessionByParticipantIds(
+                        myId,
+                        partnerUserId
+                );
+
+        for (ChatMessage msg : selectedChatSession.chat_messages())
+        {
+            if (msg.senderId().equals(myId))
+            {
+                chatContentList_LV.getItems().add("me : " + msg.content());
+            }
+            else
+            {
+                chatContentList_LV.getItems().add(myContacts.get(0).userName() + ": " + msg.content());
+            }
+        }
+    }
+
+    private void updateSessionList(){
+
+        this.myContacts = ChatViewService.getInstance().getMyContacts();
+        this.namesOfMyContacts = new ArrayList<>();
+        this.myId = ChatViewService.getInstance().getMeAsUserObject().userId();
+
+        for (AppUser contact : myContacts){
+            namesOfMyContacts.add(contact.userName());
+            mapFromUsernameToUserId.put(contact.userName(), contact.userId());
+            mapFromUserIdToUserName.put(contact.userId(), contact.userName());
+        }
+
+        sessionList_LV.getItems().clear();
+        sessionList_LV.getItems().addAll(namesOfMyContacts);
+
+    }
+
     @FXML
     public void onClick_send(ActionEvent event) throws IOException {
 
-        JSONObject chatMessageJson = new JSONObject();
-
         String recipientId = "";
+
+
         if (ChatViewService.getInstance().getMyContacts().size() == 0) {
             return;
         }
         if (sessionList_LV.getSelectionModel().getSelectedItems().size() == 0){
             recipientId = this.myContacts.get(0).userId();
         } else {
-            recipientId = sessionList_LV.getSelectionModel().getSelectedItems().get(0);
+            String recipientName = sessionList_LV.getSelectionModel().getSelectedItems().get(0);
+            recipientId = mapFromUsernameToUserId.get(recipientName);
         }
 
         LocalDate localDate = LocalDate.now();
@@ -200,6 +214,15 @@ public class ChatViewController {
 
         sendChatContent_TV.clear();
 
+    }
+
+    @FXML
+    public void onClick_AddChatPartner (ActionEvent event) throws IOException
+    {
+        String searchUserName = this.addUser_TF.getText();
+        String searchUserId = ChatViewService.getInstance().getUserByUserName(searchUserName).userId();
+        ChatViewService.getInstance().findOrAddChatSessionByParticipantIds(myId, searchUserId);
+        updateSessionList();
     }
 
 
