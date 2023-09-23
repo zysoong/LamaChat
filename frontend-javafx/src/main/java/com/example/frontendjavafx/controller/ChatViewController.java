@@ -115,6 +115,8 @@ public class ChatViewController {
             @Override
             public void handleFrame(StompHeaders headers, Object payload) {
 
+                updateSessionList();
+
                 ChatMessage msgReceived;
 
                 try {
@@ -184,8 +186,15 @@ public class ChatViewController {
             mapFromUserIdToUserName.put(contact.userId(), contact.userName());
         }
 
-        sessionList_LV.getItems().clear();
-        sessionList_LV.getItems().addAll(namesOfMyContacts);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                sessionList_LV.getItems().clear();
+                sessionList_LV.getItems().addAll(namesOfMyContacts);
+            }
+        });
+
+
 
     }
 
