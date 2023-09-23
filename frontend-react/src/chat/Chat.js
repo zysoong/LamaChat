@@ -19,6 +19,7 @@ const Chat = (props) => {
     const [text, setText] = useState("");
     const [sessionPartners, setSessionPartners] = useState([]);
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
+    const activeSessionPartnerID_Ref = useRef(undefined);
     const [messages, setMessages] = useState([]);
     const isExistingContact = useRef(false)
     const [isAdding, setIsAdding] = useState(false)
@@ -26,15 +27,24 @@ const Chat = (props) => {
 
     useEffect( () => {
         isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
-    }, [activeSessionPartnerID] )
+        activeSessionPartnerID_Ref.current = activeSessionPartnerID
+    }, [activeSessionPartnerID, sessionPartners])
 
-    const onMessageReceived = useCallback((msg) => {
+    const onMessageReceived = (msg) => {
+
+        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(JSON.parse(msg.body).senderId))
+
         if (!isExistingContact.current)
         {
-            loadContacts()
+            getMyContacts().then((users) => {
+                setSessionPartners(users);
+            })
         }
-        setMessages(messages => [...messages, JSON.parse(msg.body)])
-    }, [activeSessionPartnerID])
+        if (activeSessionPartnerID_Ref.current === JSON.parse(msg.body).senderId)
+        {
+            setMessages(messages => [...messages, JSON.parse(msg.body)])
+        }
+    }
 
     const onConnected = () => {
 
@@ -57,7 +67,8 @@ const Chat = (props) => {
         getMyContacts().then((users) => {
             setSessionPartners(users);
             if (activeSessionPartnerID === undefined && users.length > 0) {
-                setActiveSessionPartnerID(users[0].userId);
+                setActiveSessionPartnerID(users[0].userId)
+                activeSessionPartnerID_Ref.current = users[0].userId
             }
         });
     };
