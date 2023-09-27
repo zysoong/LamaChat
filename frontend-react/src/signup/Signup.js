@@ -1,13 +1,11 @@
-import React, {useEffect, useState} from "react";
-import {Button, Divider, Form, Input, notification} from "antd";
-import { LockOutlined, UserOutlined,} from "@ant-design/icons";
-import {loginWithToken} from "../util/ApiUtil";
-import "./Signin.css";
+import React, { useEffect, useState } from "react";
+import {Form, Input, Button, notification, Checkbox} from "antd";
+import { DingtalkOutlined } from "@ant-design/icons";
+import {loginWithToken, signup} from "../util/ApiUtil";
+import "./Signup.css";
 import secureLocalStorage from "react-secure-storage";
-import logo from './lama.png'
 
-
-const SignIn = (props) => {
+const Signup = (props) => {
 
     const [loading, setLoading] = useState(false);
 
@@ -46,66 +44,87 @@ const SignIn = (props) => {
     }, [props.history]);
 
     const onFinish = (values) => {
-
         setLoading(true);
 
-        loginWithToken(btoa(values.username + ':' + values.password))
+        if (!values.api) {
+            values.api = '';
+        }
+
+        if (!values.apiKey) {
+            values.apiKey = '';
+        }
+
+        if (!values.isVirtualAgent) {
+            values.isVirtualAgent = false;
+        }
+
+        signup(values)
             .then(() => {
-                props.history.push("/chat");
+                notification.success({
+                    message: "Success",
+                    description:
+                        "Thank you! You're successfully registered. Please Login to continue!",
+                });
+                props.history.push("/");
                 setLoading(false);
             })
             .catch((error) => {
-                if (error.status === 401) {
-                    notification.error({
-                        message: "Error",
-                        description: "Username or Password is incorrect. Please try again!",
-                    });
-                    secureLocalStorage.removeItem("accessToken");
-                    secureLocalStorage.removeItem("loggedUser");
-                } else {
-                    notification.error({
-                        message: "Error",
-                        description:
-                            error.message || "Sorry! Something went wrong. Please try again!",
-                    });
-                    secureLocalStorage.removeItem("accessToken")
-                    secureLocalStorage.removeItem("loggedUser");
-                }
+                notification.error({
+                    message: "Error",
+                    description:
+                        error.message || "Sorry! User name was already registered",
+                });
                 setLoading(false);
             });
     };
 
     return (
         <div className="login-container">
-            <img src={logo} alt="Logo" className="logo" />
-            <h1 className="title">LamaChat</h1>
+            <DingtalkOutlined style={{ fontSize: 50 }} />
+
             <Form
                 name="normal_login"
                 className="login-form"
-                initialValues={{remember: true}}
+                initialValues={{ remember: true }}
                 onFinish={onFinish}
             >
+
                 <Form.Item
-                    name="username"
-                    rules={[{required: true, message: "Please input your Username!"}]}
+                    name="userName"
+                    rules={[{ required: true, message: "Please input your Username!" }]}
                 >
-                    <Input
-                        size="large"
-                        prefix={<UserOutlined className="site-form-item-icon"/>}
-                        placeholder="Username"
-                    />
+                    <Input size="large" placeholder="Username" />
                 </Form.Item>
+
                 <Form.Item
                     name="password"
-                    rules={[{required: true, message: "Please input your Password!"}]}
+                    rules={[{ required: true, message: "Please input your Password!" }]}
                 >
-                    <Input
-                        size="large"
-                        prefix={<LockOutlined className="site-form-item-icon"/>}
-                        type="password"
-                        placeholder="Password"
-                    />
+                    <Input size="large" type="password" placeholder="Password" />
                 </Form.Item>
+
+                <Form.Item
+                    name="api"
+                    rules={[{ required: false, message: "Please input your API URL!" }]}
+                >
+                    <Input size="large" placeholder="API" />
+                </Form.Item>
+
+                <Form.Item
+                    name="apiKey"
+                    rules={[{ required: false, message: "Please input your API Key!" }]}
+                >
+                    <Input size="large" placeholder="API Key" />
+                </Form.Item>
+
+                <Form.Item
+                    name="isVirtualAgent"
+                    label="Are you a bot?"
+                    valuePropName="checked"
+                >
+                    <Checkbox />
+                </Form.Item>
+
                 <Form.Item>
                     <Button
                         shape="round"
@@ -114,14 +133,13 @@ const SignIn = (props) => {
                         className="login-form-button"
                         loading={loading}
                     >
-                        Log in
+                        Signup
                     </Button>
                 </Form.Item>
-                <Divider>OR</Divider>
-                Not a member yet? <a href="/signup">Sign up</a>
+                Already a member? <a href="/">Log in</a>
             </Form>
         </div>
     );
 };
 
-export default SignIn;
+export default Signup;

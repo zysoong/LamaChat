@@ -47,8 +47,6 @@ const requestText = (options) => {
     headers.append("Content-Type", "application/json");
   }
 
-  //headers.append("Accept", "application/json");
-
   if (secureLocalStorage.getItem("sessionId")) {
     headers.append(
       "Cookie",
@@ -149,7 +147,7 @@ export function logout() {
 }
 
 export function signup(signupRequest) {
-  return request({
+  return requestText({
     url: AUTH_SERVICE + "/api/auth/register",
     method: "POST",
     body: JSON.stringify(signupRequest),
