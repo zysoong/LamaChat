@@ -67,6 +67,10 @@
               <HBox.margin>
                 <Insets right="20.0" />
               </HBox.margin></Button>
+            <Button alignment="CENTER_RIGHT" mnemonicParsing="false" text="Registrierung" onAction="#onClick_switchToRegisterView">
+              <HBox.margin>
+                <Insets right="40.0" />
+              </HBox.margin></Button>
           </children>
         </HBox>
       </children>
