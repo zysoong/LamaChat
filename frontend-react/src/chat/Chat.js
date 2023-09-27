@@ -12,6 +12,8 @@ import "./Chat.css";
 import secureLocalStorage from "react-secure-storage";
 import {createImageFromInitials, getRandomColor} from "../util/ImageUtil";
 
+const host = process.env.REACT_APP_SERVER_HOST;
+
 let stompClient = null;
 const Chat = (props) => {
 
@@ -77,7 +79,7 @@ const Chat = (props) => {
     const connect = () => {
         const Stomp = require("stompjs");
         let SockJS = require("sockjs-client");
-        SockJS = new SockJS("http://95.179.161.241:8080/ws");
+        SockJS = new SockJS("http://" + host + "/ws");
         stompClient = Stomp.over(SockJS);
         stompClient.connect({}, onConnected, onError);
     };
