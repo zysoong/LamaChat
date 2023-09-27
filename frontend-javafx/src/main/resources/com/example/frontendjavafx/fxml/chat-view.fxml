@@ -14,7 +14,7 @@
          <children>
             <ListView fx:id="sessionList_LV" layoutX="9.0" layoutY="40.0" prefHeight="288.0" prefWidth="157.0" />
             <Text fx:id="welcomeText_T" layoutX="14.0" layoutY="27.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Text" />
-            <Button fx:id="logoutButton_B" layoutX="9.0" layoutY="365.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="157.0" text="Log out" />
+            <Button fx:id="logoutButton_B" layoutX="9.0" layoutY="365.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="157.0" text="Log out" onAction="#onClick_Logout"/>
             <TextField fx:id="addUser_TF" layoutX="9.0" layoutY="334.0" prefHeight="25.0" prefWidth="96.0" />
             <Button fx:id="addButton_B" layoutX="109.0" layoutY="334.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="57.0" text="Add" onAction="#onClick_AddChatPartner"/>
          </children></AnchorPane>

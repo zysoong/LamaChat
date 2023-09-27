@@ -48,7 +48,7 @@ public class AuthenticationService {
 
     public boolean logout() {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(URL_BACKEND + "/api/users/logout"))
+                .uri(URI.create(URL_BACKEND + "/api/auth/logout"))
                 .POST(HttpRequest.BodyPublishers.ofString(""))
                 .header("Cookie", "JSESSIONID=" + sessionId)
                 .build();

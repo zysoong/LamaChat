@@ -4,7 +4,9 @@ import com.example.frontendjavafx.model.ChatMessage;
 import com.example.frontendjavafx.model.ChatMessageSend;
 import com.example.frontendjavafx.model.ChatSession;
 import com.example.frontendjavafx.security.AppUser;
+import com.example.frontendjavafx.security.AuthenticationService;
 import com.example.frontendjavafx.service.ChatViewService;
+import com.example.frontendjavafx.service.SceneSwitchService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -193,9 +195,6 @@ public class ChatViewController {
                 sessionList_LV.getItems().addAll(namesOfMyContacts);
             }
         });
-
-
-
     }
 
     @FXML
@@ -232,9 +231,7 @@ public class ChatViewController {
         if (lastIndex >= 0) {
             chatContentList_LV.scrollTo(lastIndex);
         }
-
         sendChatContent_TV.clear();
-
     }
 
     @FXML
@@ -244,6 +241,13 @@ public class ChatViewController {
         String searchUserId = ChatViewService.getInstance().getUserByUserName(searchUserName).userId();
         ChatViewService.getInstance().findOrAddChatSessionByParticipantIds(myId, searchUserId);
         updateSessionList();
+    }
+
+    @FXML
+    public void onClick_Logout (ActionEvent event) throws IOException
+    {
+        AuthenticationService.getInstance().logout();
+        SceneSwitchService.getInstance().switchToLoginView(event);
     }
 
 

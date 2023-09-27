@@ -95,6 +95,8 @@ public class ChatViewService {
         return result;
     }
 
+
+
     private AppUser mapToAppUser(String responseBody) {
         try {
             return objectMapper.readValue(responseBody, AppUser.class);
