@@ -70,13 +70,13 @@ jobs:
       - name: Restart docker container
         uses: appleboy/ssh-action@master
         with:
-          host: capstone-project.de
+          host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_SSH_PASSWORD }}
           script: |
             docker stop ${{ secrets.SERVER_USERNAME }}
             docker rm ${{ secrets.SERVER_USERNAME }}
-            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} --network capstones --ip 10.0.6.9 --restart always --detach ziso3928/lama-chat-backend:latest
+            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} --ip ${{ secrets.SERVER_IP }} --restart always --detach ziso3928/lama-chat-backend:latest
             sleep 15s
             docker logs ${{ secrets.SERVER_USERNAME }}
 
