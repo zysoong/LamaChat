@@ -76,7 +76,7 @@ jobs:
           script: |
             docker stop ${{ secrets.SERVER_USERNAME }}
             docker rm ${{ secrets.SERVER_USERNAME }}
-            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} --ip ${{ secrets.SERVER_IP }} --restart always --detach ziso3928/lama-chat-backend:latest
+            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} --restart always --detach ziso3928/lama-chat-master-backend:latest
             sleep 15s
             docker logs ${{ secrets.SERVER_USERNAME }}
 
