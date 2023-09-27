@@ -77,7 +77,7 @@ const Chat = (props) => {
     const connect = () => {
         const Stomp = require("stompjs");
         let SockJS = require("sockjs-client");
-        SockJS = new SockJS("http://localhost:8080/ws");
+        SockJS = new SockJS("http://95.179.161.241:8080/ws");
         stompClient = Stomp.over(SockJS);
         stompClient.connect({}, onConnected, onError);
     };
