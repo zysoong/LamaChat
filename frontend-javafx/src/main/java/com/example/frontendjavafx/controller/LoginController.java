@@ -20,7 +20,7 @@ public class LoginController {
     @FXML
     private PasswordField password_TF;
 
-    private String STUDENTS_URL_BACKEND = System.getenv("BACKEND_URI");
+    private String URL_BACKEND = System.getenv("BACKEND_URI");
 
     public void initialize() {
     }
@@ -43,7 +43,7 @@ public class LoginController {
             System.out.println("LOGIN NAME IS _______________ " + AuthenticationService.getInstance().getUsername());
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(STUDENTS_URL_BACKEND + "/api/auth/" + loginName))
+                    .uri(URI.create(URL_BACKEND + "/api/auth/" + loginName))
                     .header("Accept", "application/json")
                     .header("Cookie", "JSESSIONID=" + AuthenticationService.getInstance().getSessionId())
                     .build();

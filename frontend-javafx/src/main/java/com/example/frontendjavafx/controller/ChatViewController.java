@@ -63,6 +63,8 @@ public class ChatViewController {
     private String myId;
     private String selectedUserId;
 
+    private String URL_BACKEND = System.getenv("BACKEND_URI");
+
 
     public void initialize() {
 
@@ -84,7 +86,8 @@ public class ChatViewController {
                     }
                 });
 
-        String serverUrl = "http://localhost:8080/ws";
+
+        String serverUrl = URL_BACKEND + "/ws";
 
         List<Transport> transports = new ArrayList<>();
         transports.add(new WebSocketTransport(new StandardWebSocketClient()));

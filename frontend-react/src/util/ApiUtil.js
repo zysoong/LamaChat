@@ -1,7 +1,10 @@
 import { notification } from "antd";
 import secureLocalStorage from "react-secure-storage";
-const AUTH_SERVICE = "http://localhost:8080";
-const CHAT_SERVICE = "http://localhost:8080";
+
+const host = process.env.REACT_APP_SERVER_HOST;
+
+const AUTH_SERVICE = "http://" + host;
+const CHAT_SERVICE = "http://" + host;
 
 const request = (options) => {
   const headers = new Headers();
