@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useRef, useState} from "react";
-import { Button } from "antd";
+import {Button, notification} from "antd";
 import {
     getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts, logout,
 } from "../util/ApiUtil";
@@ -19,21 +19,32 @@ const Chat = (props) => {
     const [text, setText] = useState("");
     const [sessionPartners, setSessionPartners] = useState([]);
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
+    const activeSessionPartnerID_Ref = useRef(undefined);
     const [messages, setMessages] = useState([]);
     const isExistingContact = useRef(false)
+    const [isAdding, setIsAdding] = useState(false)
+    const [addUserText, setAddUserText] = useState("")
 
     useEffect( () => {
         isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
-    }, [activeSessionPartnerID] )
+        activeSessionPartnerID_Ref.current = activeSessionPartnerID
+    }, [activeSessionPartnerID, sessionPartners])
 
-    const onMessageReceived = useCallback((msg) => {
+    const onMessageReceived = (msg) => {
+
+        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(JSON.parse(msg.body).senderId))
+
         if (!isExistingContact.current)
         {
-            console.log(sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
-            loadContacts()
+            getMyContacts().then((users) => {
+                setSessionPartners(users);
+            })
         }
-        setMessages(messages => [...messages, JSON.parse(msg.body)])
-    }, [activeSessionPartnerID])
+        if (activeSessionPartnerID_Ref.current === JSON.parse(msg.body).senderId)
+        {
+            setMessages(messages => [...messages, JSON.parse(msg.body)])
+        }
+    }
 
     const onConnected = () => {
 
@@ -56,7 +67,8 @@ const Chat = (props) => {
         getMyContacts().then((users) => {
             setSessionPartners(users);
             if (activeSessionPartnerID === undefined && users.length > 0) {
-                setActiveSessionPartnerID(users[0].userId);
+                setActiveSessionPartnerID(users[0].userId)
+                activeSessionPartnerID_Ref.current = users[0].userId
             }
         });
     };
@@ -105,6 +117,40 @@ const Chat = (props) => {
         })
     };
 
+    const handleAddUser = () => {
+
+        let promise_findMyId = new Promise((resolve) => {
+            findUserByUserName(secureLocalStorage.getItem("loggedUser"))
+                .then((user) => { return user.userId })
+                .then((userId) => { resolve(userId) ; })
+        })
+
+        let promise_findAddingUserId = new Promise((resolve) => {
+            findUserByUserName(addUserText)
+                .then((user) => { return user.userId })
+                .then((userId) => { resolve(userId) ; })
+                .catch((error) => {
+                    notification.error({
+                        message: "Error",
+                        description: "User " + addUserText + " not found",
+                    })
+                })
+        })
+
+        Promise.all([promise_findMyId, promise_findAddingUserId])
+            .then((results) => {
+                return findOrAddChatSessionByParticipantIds(results[0], results[1])
+            })
+            .then((chatSession) => {
+                return chatSession.chat_messages
+            })
+            .then((messages) => {
+                setMessages(messages)
+            })
+            .then(() => {
+                loadContacts()
+            })
+    }
 
     useEffect(() => {
         if (secureLocalStorage.getItem("accessToken") === null) {
@@ -181,15 +227,38 @@ const Chat = (props) => {
                         ))}
                     </ul>
                 </div>
-                <div id="bottom-bar">
-                    <button id="addcontact">
-                        <i className="fa fa-plus fa-fw" aria-hidden="true"></i>{" "}
-                        <span>Add</span>
-                    </button>
-                    <button id="settings" onClick={logoutOnClick}>
-                        <i className="fa fa-sign-out fa-fw" aria-hidden="true"></i>{" "}
-                        <span>Logout</span>
-                    </button>
+
+                <div className="container">
+
+                    {isAdding &&
+                        <div id="bottom-bar-add">
+                            <input
+                                id="add_user_input"
+                                type="text"
+                                placeholder="Enter user name"
+                                value={addUserText}
+                                onChange={(event) => {setAddUserText(event.target.value)}}
+                            />
+                            <button
+                                id="confirmAddContact"
+                                onClick={() => { handleAddUser(); setIsAdding(false) }}
+                            >
+                                <i className="fa fa-check fa-fw" aria-hidden="true"></i>
+                                OK
+                            </button>
+                        </div>
+                    }
+
+                    <div id="bottom-bar">
+                        <button id="addcontact" onClick={() => { setIsAdding(true) }}>
+                            <i className="fa fa-plus fa-fw" aria-hidden="true"></i>{" "}
+                            <span>Add</span>
+                        </button>
+                        <button id="settings" onClick={logoutOnClick}>
+                            <i className="fa fa-sign-out fa-fw" aria-hidden="true"></i>{" "}
+                            <span>Logout</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             <div className="content">

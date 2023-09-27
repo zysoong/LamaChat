@@ -25,10 +25,10 @@ public class LoginController {
     public void initialize() {
     }
 
-    /*@FXML
+    @FXML
     public void onClick_switchToRegisterView(ActionEvent event) throws IOException {
         SceneSwitchService.getInstance().switchToRegistrationView(event);
-    }*/
+    }
 
     @FXML
     public void onClick_login(ActionEvent event) throws IOException {
