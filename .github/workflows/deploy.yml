@@ -74,11 +74,11 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           password: ${{ secrets.SERVER_SSH_PASSWORD }}
           script: |
-            sudo docker stop ${{ secrets.SERVER_USERNAME }}
-            sudo docker rm ${{ secrets.SERVER_USERNAME }}
-            sudo docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} --network capstones --ip 10.0.6.9 --restart always --detach ziso3928/lama-chat-backend:latest
+            docker stop ${{ secrets.SERVER_USERNAME }}
+            docker rm ${{ secrets.SERVER_USERNAME }}
+            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} --network capstones --ip 10.0.6.9 --restart always --detach ziso3928/lama-chat-backend:latest
             sleep 15s
-            sudo docker logs ${{ secrets.SERVER_USERNAME }}
+            docker logs ${{ secrets.SERVER_USERNAME }}
 
       - name: Check the deployed service URL
         uses: jtalk/url-health-check-action@v3
