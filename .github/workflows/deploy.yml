@@ -42,6 +42,8 @@ jobs:
           node-version: '18'
 
       - name: Build Frontend
+        args:
+          REACT_APP_SERVER_HOST: ${{ secrets.SERVER_HOST }}
         working-directory: frontend-react
         run: |
           npm install
@@ -117,7 +119,7 @@ jobs:
           script: |
             docker stop ${{ secrets.SERVER_USERNAME }}
             docker rm ${{ secrets.SERVER_USERNAME }}
-            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} -e=REACT_APP_SERVER_HOST=${{ secrets.SERVER_HOST }} -p 80:8080 --restart always --detach ziso3928/lama-chat-backend:latest
+            docker run --pull=always --name ${{ secrets.SERVER_USERNAME }} -e=MONGO_DB_URI=${{ secrets.MONGODB_URI }} -p 80:8080 --restart always --detach ziso3928/lama-chat-backend:latest
             sleep 15s
             docker logs ${{ secrets.SERVER_USERNAME }}
 
