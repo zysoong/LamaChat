@@ -42,7 +42,7 @@ jobs:
           node-version: '18'
 
       - name: Build Frontend
-        args:
+        env:
           REACT_APP_SERVER_HOST: ${{ secrets.SERVER_HOST }}
         working-directory: frontend-react
         run: |
