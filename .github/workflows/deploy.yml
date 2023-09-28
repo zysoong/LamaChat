@@ -42,7 +42,7 @@ jobs:
           node-version: '18'
 
       - name: Build Frontend
-        working-directory: frontend
+        working-directory: frontend-react
         run: |
           npm install
           npm run build
