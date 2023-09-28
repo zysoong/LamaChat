@@ -60,7 +60,7 @@ jobs:
 
       - uses: actions/download-artifact@v2
         with:
-          name: frontend-build
+          name: build
           path: backend/src/main/resources/static
 
       - name: Set up JDK
