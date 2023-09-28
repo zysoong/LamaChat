@@ -118,7 +118,7 @@ const SignIn = (props) => {
                     </Button>
                 </Form.Item>
                 <Divider>OR</Divider>
-                Not a member yet? <a href="/signup">Sign up</a>
+                Not a member yet? <a href="/#/signup">Sign up</a>
             </Form>
         </div>
     );

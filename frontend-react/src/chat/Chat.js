@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useRef, useState} from "react";
+import React, { useEffect, useRef, useState} from "react";
 import {Button, notification} from "antd";
 import {
     getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts, logout,
@@ -161,6 +161,7 @@ const Chat = (props) => {
             connect();
             loadContacts();
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.history]);
 
     useEffect(() => {

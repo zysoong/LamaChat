@@ -17,10 +17,53 @@ on:
 
 jobs:
 
-  build-backend:
+  build-frontend-javafx:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Set up JDK
+        uses: actions/setup-java@v2
+        with:
+          java-version: '20'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Build with maven
+        run: mvn -B package --file frontend-javafx/pom.xml
+
+  build-frontend-react:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Build Frontend
+        env:
+          REACT_APP_SERVER_HOST: ${{ secrets.SERVER_HOST }}
+        working-directory: frontend-react
+        run: |
+          npm install
+          npm run build
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: frontend-build
+          path: frontend-react/build/
+
+  build-backend:
+    runs-on: ubuntu-latest
+    needs: build-frontend-react
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: actions/download-artifact@v2
+        with:
+          name: frontend-build
+          path: backend/src/main/resources/static
 
       - name: Set up JDK
         uses: actions/setup-java@v2
@@ -84,7 +127,7 @@ jobs:
         uses: jtalk/url-health-check-action@v3
         with:
           #Set App Name (replace "antimon" with "oxygen", "phosphorus", "mercury")
-          url: ${{ secrets.SERVER_URL }}
+          url: ${{ secrets.SERVER_URL }}/welcome
           max-attempts: 3
           retry-delay: 5s
           retry-all: true

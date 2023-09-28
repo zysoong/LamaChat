@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import {Form, Input, Button, notification, Checkbox} from "antd";
-import { DingtalkOutlined } from "@ant-design/icons";
 import {loginWithToken, signup} from "../util/ApiUtil";
 import "./Signup.css";
 import secureLocalStorage from "react-secure-storage";
+import logo from './lama.png'
 
 const Signup = (props) => {
 
@@ -80,7 +80,7 @@ const Signup = (props) => {
 
     return (
         <div className="login-container">
-            <DingtalkOutlined style={{ fontSize: 50 }} />
+            <img src={logo} alt="Logo" className="logo" />
 
             <Form
                 name="normal_login"
