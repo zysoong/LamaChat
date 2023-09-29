@@ -172,6 +172,8 @@ const Chat = (props) => {
         }
         else {
 
+            setMessages([])
+
             getMe()
                 .then((me) => {
                     return findUserByUserName(me)
@@ -301,6 +303,7 @@ const Chat = (props) => {
                                 sendMessage(text);
                                 setText("");
                             }}
+                            disabled={sessionPartners.length === 0}
                         />
                     </div>
                 </div>
