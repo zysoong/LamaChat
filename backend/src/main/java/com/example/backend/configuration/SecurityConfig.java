@@ -38,6 +38,7 @@ public class SecurityConfig {
                     customizer.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     customizer.requestMatchers(HttpMethod.GET, "/api/auth/**").authenticated();
                     customizer.requestMatchers(HttpMethod.POST, "/api/chatsessions/**").authenticated();
+                    customizer.requestMatchers(HttpMethod.GET, "/#/**").permitAll();
                     customizer.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
