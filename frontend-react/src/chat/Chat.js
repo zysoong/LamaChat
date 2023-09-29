@@ -205,7 +205,7 @@ const Chat = (props) => {
                             className="online"
                             alt=""
                         />
-                        <p>{"Welcome to LamaChat, " + currentUser.userName + " !"}</p>
+                        <p>{"Welcome, " + currentUser.userName + " !"}</p>
                     </div>
                 </div>
                 <div id="search" />
