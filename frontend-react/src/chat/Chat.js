@@ -281,6 +281,7 @@ const Chat = (props) => {
                         ))}
                     </ul>
                 </ScrollToBottom>
+                {sessionPartners.length > 0 && (
                 <div className="message-input">
                     <div className="wrap">
                         <input
@@ -307,6 +308,7 @@ const Chat = (props) => {
                         />
                     </div>
                 </div>
+                )}
             </div>
         </div>
     );
