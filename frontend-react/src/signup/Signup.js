@@ -94,7 +94,7 @@ const Signup = (props) => {
             ? [{ required: true, message: "Please input your API url!" }]
             : [{ required: false, message: "" }];
         const newApiKeyRules = e.target.checked
-            ? [{ required: true, message: "Please input your API key!" }]
+            ? [{ required: false, message: "Please input your API key!" }]
             : [{ required: false, message: "" }];
 
         setApiRules(newApiRules)
