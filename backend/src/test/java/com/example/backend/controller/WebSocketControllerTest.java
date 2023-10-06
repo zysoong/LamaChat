@@ -92,14 +92,11 @@ public class WebSocketControllerTest {
                         .content(objectMapper.writeValueAsString(user1)))
                 .andExpect(status().isCreated());
 
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user2)))
                 .andExpect(status().isCreated())
                 .andReturn();
-
-        HttpServletRequest request = mvcResult.getRequest();
-        String requestUrl = request.getRequestURL().toString();
 
         AppUser savedUser1 =
                 appUserRepository
