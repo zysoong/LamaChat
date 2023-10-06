@@ -42,14 +42,10 @@ public class ChatSessionControllerTest {
 
     ObjectMapper objectMapper = new ObjectMapper();
 
-    @Test
-    @DirtiesContext
-    @WithMockUser
-    void addChatSession_whenNoChatSessionExistsAndUserExists_thenAddNewSessionToDB() throws Exception {
-
+    private void registerUsers(String userName_1, String userName_2) throws Exception {
         AppUser user1 = new AppUser(
                 null,
-                "user1",
+                userName_1,
                 "123456",
                 AppUserRole.USER,
                 new ArrayList<>(),
@@ -59,7 +55,7 @@ public class ChatSessionControllerTest {
 
         AppUser user2 = new AppUser(
                 null,
-                "user2",
+                userName_2,
                 "123456",
                 AppUserRole.USER,
                 new ArrayList<>(),
@@ -76,41 +72,88 @@ public class ChatSessionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user2)))
                 .andExpect(status().isCreated());
+    }
+
+    private void addChatSessionToUsers(String userName_1, String userName_2) throws Exception{
 
         AppUser savedUser1 =
                 appUserRepository
-                        .findAppUserByUserName("user1")
+                        .findAppUserByUserName(userName_1)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user1 not found")
                         );
 
         AppUser savedUser2 =
                 appUserRepository
-                        .findAppUserByUserName("user2")
+                        .findAppUserByUserName(userName_2)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user2 not found")
                         );
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
-                                savedUser1.userId() + "/" + savedUser2.userId())
-                        )
+                        savedUser1.userId() + "/" + savedUser2.userId())
+                )
                 .andExpect(status().isCreated());
+    }
+
+    private void addChatMessageToUsers(String userName_1, String userName_2, String content) throws Exception
+    {
+        AppUser savedUser1 =
+                appUserRepository
+                        .findAppUserByUserName(userName_1)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
+                        );
+
+        AppUser savedUser2 =
+                appUserRepository
+                        .findAppUserByUserName(userName_2)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
+                        );
+
+        LocalDate localDate = LocalDate.now();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        ChatMessage msgToSend = new ChatMessage(
+                null,
+                savedUser1.userId(),
+                savedUser2.userId(),
+                date,
+                content
+        );
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/message/" + savedUser1.userId() + "/" + savedUser2.userId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(msgToSend)))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    @DirtiesContext
+    @WithMockUser
+    void addChatSession_whenNoChatSessionExistsAndUserExists_thenAddNewSessionToDB() throws Exception {
+
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        registerUsers(userName_1, userName_2);
+        addChatSessionToUsers(userName_1, userName_2);
 
         AppUser user1AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user1")
+                        .findAppUserByUserName(userName_1)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user1 not found")
                         );
 
         AppUser user2AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user2")
+                        .findAppUserByUserName(userName_2)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user2 not found")
                         );
 
-        String uniqueSessionId = generateSessionUniqueIdentifier(savedUser1.userId(), savedUser2.userId());
+        String uniqueSessionId = generateSessionUniqueIdentifier(user1AfterCreation.userId(), user2AfterCreation.userId());
 
         assertEquals(user1AfterCreation.chat_sessions().get(0).uniqueSessionIdentifier(),
                 uniqueSessionId);
@@ -128,75 +171,27 @@ public class ChatSessionControllerTest {
     @WithMockUser
     void addChatSession_whenChatSessionExistsAndUserExists_thenDoNothing() throws Exception {
 
-        AppUser user1 = new AppUser(
-                null,
-                "user1",
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        AppUser user2 = new AppUser(
-                null,
-                "user2",
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
-                .andExpect(status().isCreated());
-
-        AppUser savedUser1 =
-                appUserRepository
-                        .findAppUserByUserName("user1")
-                        .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
-                        );
-
-        AppUser savedUser2 =
-                appUserRepository
-                        .findAppUserByUserName("user2")
-                        .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
-                        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
-                        savedUser1.userId() + "/" + savedUser2.userId())
-                )
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
-                        savedUser1.userId() + "/" + savedUser2.userId())
-                )
-                .andExpect(status().isCreated());
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        registerUsers(userName_1, userName_2);
+        addChatSessionToUsers(userName_1, userName_2);
+        addChatSessionToUsers(userName_1, userName_2);
 
         AppUser user1AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user1")
+                        .findAppUserByUserName(userName_1)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user1 not found")
                         );
 
         AppUser user2AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user2")
+                        .findAppUserByUserName(userName_2)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user2 not found")
                         );
 
-        String uniqueSessionId = generateSessionUniqueIdentifier(savedUser1.userId(), savedUser2.userId());
+        String uniqueSessionId = generateSessionUniqueIdentifier(user1AfterCreation.userId(), user2AfterCreation.userId());
 
         assertEquals(user1AfterCreation.chat_sessions().get(0).uniqueSessionIdentifier(),
                 uniqueSessionId);
@@ -233,82 +228,27 @@ public class ChatSessionControllerTest {
     @WithMockUser
     void addMessageToChatSession_whenNoChatSessionExists_thenAddNewSessionAndAddMessage() throws Exception {
 
-        AppUser user1 = new AppUser(
-                null,
-                "user1",
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        AppUser user2 = new AppUser(
-                null,
-                "user2",
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
-                .andExpect(status().isCreated());
-
-        AppUser savedUser1 =
-                appUserRepository
-                        .findAppUserByUserName("user1")
-                        .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
-                        );
-
-        AppUser savedUser2 =
-                appUserRepository
-                        .findAppUserByUserName("user2")
-                        .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
-                        );
-
-        LocalDate localDate = LocalDate.now();
-        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        String content = "Hi! 12ce6f";
-
-        ChatMessage msgToSend = new ChatMessage(
-                null,
-                savedUser1.userId(),
-                savedUser2.userId(),
-                date,
-                content
-        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/message/" + savedUser1.userId() + "/" + savedUser2.userId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(msgToSend)))
-                .andExpect(status().isCreated());
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        String content = "Hi! How was it going. ";
+        registerUsers(userName_1, userName_2);
+        addChatMessageToUsers(userName_1, userName_2, content);
 
         AppUser user1AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user1")
+                        .findAppUserByUserName(userName_1)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user1 not found")
                         );
 
         AppUser user2AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user2")
+                        .findAppUserByUserName(userName_2)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user2 not found")
                         );
 
-        String uniqueSessionId = generateSessionUniqueIdentifier(savedUser1.userId(), savedUser2.userId());
+        String uniqueSessionId = generateSessionUniqueIdentifier(user1AfterCreation.userId(), user2AfterCreation.userId());
 
         assertEquals(user1AfterCreation.chat_sessions().get(0).uniqueSessionIdentifier(),
                 uniqueSessionId);
@@ -332,88 +272,29 @@ public class ChatSessionControllerTest {
     @WithMockUser
     void addMessageToChatSession_whenChatSessionExists_thenAddMessage() throws Exception {
 
-        AppUser user1 = new AppUser(
-                null,
-                "user1",
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        AppUser user2 = new AppUser(
-                null,
-                "user2",
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
-                .andExpect(status().isCreated());
-
-        AppUser savedUser1 =
-                appUserRepository
-                        .findAppUserByUserName("user1")
-                        .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
-                        );
-
-        AppUser savedUser2 =
-                appUserRepository
-                        .findAppUserByUserName("user2")
-                        .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
-                        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
-                        savedUser1.userId() + "/" + savedUser2.userId())
-                )
-                .andExpect(status().isCreated());
-
-        LocalDate localDate = LocalDate.now();
-        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        String content = "Hi! 12ce6f";
-
-        ChatMessage msgToSend = new ChatMessage(
-                null,
-                savedUser1.userId(),
-                savedUser2.userId(),
-                date,
-                content
-        );
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/message/" + savedUser1.userId() + "/" + savedUser2.userId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(msgToSend)))
-                .andExpect(status().isCreated());
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        String content = "Hi! How was it going. ";
+        registerUsers(userName_1, userName_2);
+        addChatSessionToUsers(userName_1, userName_2);
+        addChatMessageToUsers(userName_1, userName_2, content);
 
 
         AppUser user1AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user1")
+                        .findAppUserByUserName(userName_1)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user1 not found")
                         );
 
         AppUser user2AfterCreation =
                 appUserRepository
-                        .findAppUserByUserName("user2")
+                        .findAppUserByUserName(userName_2)
                         .orElseThrow(() ->
                                 new NoSuchElementException("Error in ChatSession controller test. user2 not found")
                         );
 
-        String uniqueSessionId = generateSessionUniqueIdentifier(savedUser1.userId(), savedUser2.userId());
+        String uniqueSessionId = generateSessionUniqueIdentifier(user1AfterCreation.userId(), user2AfterCreation.userId());
 
         assertEquals(user1AfterCreation.chat_sessions().get(0).uniqueSessionIdentifier(),
                 uniqueSessionId);
@@ -446,7 +327,7 @@ public class ChatSessionControllerTest {
 
         LocalDate localDate = LocalDate.now();
         Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        String content = "Hi! 12ce6f";
+        String content = "Hi! How was it going?";
 
         ChatMessage msgToSend = new ChatMessage(
                 null,
@@ -457,7 +338,7 @@ public class ChatSessionControllerTest {
         );
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/message/" +
-                        "123" + "/" + "456")
+                                "123" + "/" + "456")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(msgToSend))
                 )
