@@ -103,7 +103,7 @@ const Signup = (props) => {
 
     return (
         <div className="login-container">
-            <img src={logo} alt="Logo" className="logo" style={{ margin: 30 }}/>
+            <img src={logo} alt="Logo" className="logo"/>
 
             <Form
                 name="normal_login"
