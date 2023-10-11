@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.model.ChatMessage;
+import com.example.backend.model.ChatMessageSendDTO;
 import com.example.backend.model.ChatSession;
 import com.example.backend.service.ChatSessionService;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +24,20 @@ public class ChatSessionController {
 
     @PostMapping("message/{participantOneId}/{participantTwoId}")
     @ResponseStatus(HttpStatus.CREATED)
-    public void addChatSession(@PathVariable("participantOneId") String participantOneId,
-                               @PathVariable("participantTwoId") String participantTwoId,
-                               @RequestBody ChatMessage msg)
+    public void addMessageToChatSession(@PathVariable("participantOneId") String participantOneId,
+                                        @PathVariable("participantTwoId") String participantTwoId,
+                                        @RequestBody ChatMessageSendDTO msg)
     {
-        chatSessionService.addChatMessageToChatSession(participantOneId, participantTwoId, msg);
+
+        ChatMessage convertedMsg = new ChatMessage(
+                msg.messageId(),
+                msg.senderId(),
+                msg.recipientId(),
+                msg.timestamp(),
+                msg.content()
+        );
+
+        chatSessionService.addChatMessageToChatSession(participantOneId, participantTwoId, convertedMsg);
     }
 
 }

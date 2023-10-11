@@ -172,6 +172,8 @@ const Chat = (props) => {
         }
         else {
 
+            setMessages([])
+
             getMe()
                 .then((me) => {
                     return findUserByUserName(me)
@@ -203,7 +205,7 @@ const Chat = (props) => {
                             className="online"
                             alt=""
                         />
-                        <p>{"Welcome to LamaChat, " + currentUser.userName + " !"}</p>
+                        <p>{"Welcome, " + currentUser.userName + " !"}</p>
                     </div>
                 </div>
                 <div id="search" />
@@ -279,6 +281,7 @@ const Chat = (props) => {
                         ))}
                     </ul>
                 </ScrollToBottom>
+                {sessionPartners.length > 0 && (
                 <div className="message-input">
                     <div className="wrap">
                         <input
@@ -301,9 +304,11 @@ const Chat = (props) => {
                                 sendMessage(text);
                                 setText("");
                             }}
+                            disabled={sessionPartners.length === 0}
                         />
                     </div>
                 </div>
+                )}
             </div>
         </div>
     );

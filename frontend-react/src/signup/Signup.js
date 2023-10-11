@@ -5,9 +5,17 @@ import "./Signup.css";
 import secureLocalStorage from "react-secure-storage";
 import logo from './lama.png'
 
+
 const Signup = (props) => {
 
     const [loading, setLoading] = useState(false);
+    const [isBotChecked, setIsBotChecked] = useState(false);
+    const [apiRules, setApiRules] = useState([
+        { required: false, message: "" },
+    ]);
+    const [apiKeyRules, setApiKeyRules] = useState([
+        { required: false, message: "" },
+    ]);
 
     useEffect(() => {
 
@@ -78,9 +86,24 @@ const Signup = (props) => {
             });
     };
 
+    const onCheckboxChange = (e) => {
+        
+        setIsBotChecked(e.target.checked);
+
+        const newApiRules = e.target.checked
+            ? [{ required: true, message: "Please input your API url!" }]
+            : [{ required: false, message: "" }];
+        const newApiKeyRules = e.target.checked
+            ? [{ required: false, message: "Please input your API key!" }]
+            : [{ required: false, message: "" }];
+
+        setApiRules(newApiRules)
+        setApiKeyRules(newApiKeyRules)
+    };
+
     return (
         <div className="login-container">
-            <img src={logo} alt="Logo" className="logo" />
+            <img src={logo} alt="Logo" className="logo"/>
 
             <Form
                 name="normal_login"
@@ -105,16 +128,16 @@ const Signup = (props) => {
 
                 <Form.Item
                     name="api"
-                    rules={[{ required: false, message: "Please input your API URL!" }]}
+                    rules={apiRules}
                 >
-                    <Input size="large" placeholder="API" />
+                    <Input size="large" placeholder="API" disabled={!isBotChecked} />
                 </Form.Item>
 
                 <Form.Item
                     name="apiKey"
-                    rules={[{ required: false, message: "Please input your API Key!" }]}
+                    rules={apiKeyRules}
                 >
-                    <Input size="large" placeholder="API Key" />
+                    <Input size="large" placeholder="API Key" disabled={!isBotChecked} />
                 </Form.Item>
 
                 <Form.Item
@@ -122,7 +145,7 @@ const Signup = (props) => {
                     label="Are you a bot?"
                     valuePropName="checked"
                 >
-                    <Checkbox />
+                    <Checkbox checked={isBotChecked} onChange={onCheckboxChange}/>
                 </Form.Item>
 
                 <Form.Item>

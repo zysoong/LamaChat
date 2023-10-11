@@ -30,7 +30,14 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(customizer -> customizer.sessionCreationPolicy(SessionCreationPolicy.ALWAYS))
                 .authorizeHttpRequests(customizer -> {
-                    customizer.requestMatchers(HttpMethod.GET, "").permitAll();
+                    customizer.requestMatchers(HttpMethod.GET, "/welcome").permitAll();
+                    customizer.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
+                    customizer.requestMatchers(HttpMethod.POST, "/api/auth/logout").permitAll();
+                    customizer.requestMatchers(HttpMethod.GET, "/api/auth/me").authenticated();
+                    customizer.requestMatchers(HttpMethod.GET, "/api/auth/me/contacts").authenticated();
+                    customizer.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
+                    customizer.requestMatchers(HttpMethod.GET, "/api/auth/**").authenticated();
+                    customizer.requestMatchers(HttpMethod.POST, "/api/chatsessions/**").authenticated();
                     customizer.anyRequest().permitAll();
                 })
                 .httpBasic(Customizer.withDefaults())
