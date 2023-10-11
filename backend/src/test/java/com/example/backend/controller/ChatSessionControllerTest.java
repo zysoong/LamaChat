@@ -44,20 +44,11 @@ public class ChatSessionControllerTest {
 
     private static final String TEST_STANDARD_PASSWORD = "123456";
 
-    private void registerUsers(String userName_1, String userName_2) throws Exception {
+    private void registerUsers(String userName) throws Exception {
+
         AppUser user1 = new AppUser(
                 null,
-                userName_1,
-                TEST_STANDARD_PASSWORD,
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        AppUser user2 = new AppUser(
-                null,
-                userName_2,
+                userName,
                 TEST_STANDARD_PASSWORD,
                 AppUserRole.USER,
                 new ArrayList<>(),
@@ -68,11 +59,6 @@ public class ChatSessionControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
                 .andExpect(status().isCreated());
     }
 
@@ -138,7 +124,8 @@ public class ChatSessionControllerTest {
 
         String userName_1 = "user1";
         String userName_2 = "user2";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatSessionToUsers(userName_1, userName_2);
 
         AppUser user1AfterCreation =
@@ -175,7 +162,8 @@ public class ChatSessionControllerTest {
 
         String userName_1 = "user1";
         String userName_2 = "user2";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatSessionToUsers(userName_1, userName_2);
         addChatSessionToUsers(userName_1, userName_2);
 
@@ -213,6 +201,39 @@ public class ChatSessionControllerTest {
 
     }
 
+
+    @Test
+    @DirtiesContext
+    @WithMockUser(username = "user3", password = TEST_STANDARD_PASSWORD)
+    void addChatSession_whenIrrelevantUserLoggedIn_thenReturnBadRequest() throws Exception {
+
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        registerUsers(userName_1);
+        registerUsers(userName_2);
+
+        AppUser savedUser1 =
+                appUserRepository
+                        .findAppUserByUserName(userName_1)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
+                        );
+
+        AppUser savedUser2 =
+                appUserRepository
+                        .findAppUserByUserName(userName_2)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
+                        );
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
+                        savedUser1.userId() + "/" + savedUser2.userId())
+                )
+                .andExpect(status().isBadRequest());
+
+    }
+
+
     @Test
     @DirtiesContext
     @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
@@ -233,7 +254,8 @@ public class ChatSessionControllerTest {
         String userName_1 = "user1";
         String userName_2 = "user2";
         String content = "Hi! How was it going. ";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatMessageToUsers(userName_1, userName_2, content);
 
         AppUser user1AfterCreation =
@@ -277,7 +299,8 @@ public class ChatSessionControllerTest {
         String userName_1 = "user1";
         String userName_2 = "user2";
         String content = "Hi! How was it going. ";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatSessionToUsers(userName_1, userName_2);
         addChatMessageToUsers(userName_1, userName_2, content);
 
