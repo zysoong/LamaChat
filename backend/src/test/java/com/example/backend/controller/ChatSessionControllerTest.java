@@ -229,7 +229,7 @@ public class ChatSessionControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
                         savedUser1.userId() + "/" + savedUser2.userId())
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isUnauthorized());
 
     }
 
