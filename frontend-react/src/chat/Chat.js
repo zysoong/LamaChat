@@ -51,6 +51,7 @@ const Chat = (props) => {
     const onConnected = () => {
 
         console.log("connected");
+        setCurrentUser({})
 
         getMe()
             .then((me) => {
