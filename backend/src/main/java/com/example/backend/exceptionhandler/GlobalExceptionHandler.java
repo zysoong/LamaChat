@@ -1,5 +1,6 @@
 package com.example.backend.exceptionhandler;
 
+import com.example.backend.exception.IllegalAuthenticationException;
 import com.mongodb.MongoWriteException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleMongoWriteException(MongoWriteException ex) {
         // You can customize the error message and HTTP status code as needed
         return new ResponseEntity<>(new ErrorResponse("[Write data to Mongo failed, may be unique key already exists?]: " + ex.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(IllegalAuthenticationException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalAuthenticationException(IllegalAuthenticationException ex) {
+        // You can customize the error message and HTTP status code as needed
+        return new ResponseEntity<>(new ErrorResponse(ex.getMessage()), HttpStatus.UNAUTHORIZED);
     }
 
 }
