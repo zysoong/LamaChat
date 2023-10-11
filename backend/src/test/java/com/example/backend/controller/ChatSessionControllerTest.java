@@ -293,6 +293,51 @@ public class ChatSessionControllerTest {
 
     @Test
     @DirtiesContext
+    @WithMockUser(username = "user3", password = TEST_STANDARD_PASSWORD)
+    void addChatMessageToChatSession_whenIrrelevantUserLoggedIn_thenReturnBadRequest() throws Exception {
+
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        String content = "Hi! How was it going. ";
+        registerUsers(userName_1);
+        registerUsers(userName_2);
+
+        AppUser savedUser1 =
+                appUserRepository
+                        .findAppUserByUserName(userName_1)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
+                        );
+
+        AppUser savedUser2 =
+                appUserRepository
+                        .findAppUserByUserName(userName_2)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
+                        );
+
+        LocalDate localDate = LocalDate.now();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        ChatMessage msgToSend = new ChatMessage(
+                null,
+                savedUser1.userId(),
+                savedUser2.userId(),
+                date,
+                content
+        );
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/message/" + savedUser1.userId() + "/" + savedUser2.userId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(msgToSend)))
+                .andExpect(status().isUnauthorized());
+
+
+
+    }
+
+    @Test
+    @DirtiesContext
     @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addMessageToChatSession_whenChatSessionExists_thenAddMessage() throws Exception {
 

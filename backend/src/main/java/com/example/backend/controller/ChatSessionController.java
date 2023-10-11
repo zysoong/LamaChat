@@ -46,18 +46,30 @@ public class ChatSessionController {
     @ResponseStatus(HttpStatus.CREATED)
     public void addMessageToChatSession(@PathVariable("participantOneId") String participantOneId,
                                         @PathVariable("participantTwoId") String participantTwoId,
-                                        @RequestBody ChatMessageSendDTO msg)
+                                        @RequestBody ChatMessageSendDTO msg,
+                                        Principal principal)
     {
 
-        ChatMessage convertedMsg = new ChatMessage(
-                msg.messageId(),
-                msg.senderId(),
-                msg.recipientId(),
-                msg.timestamp(),
-                msg.content()
-        );
+        String loggedInUserName = principal.getName();
+        String participantOneUserName = appUserService.findAppUserByUserId(participantOneId).userName();
+        String participantTwoUserName = appUserService.findAppUserByUserId(participantTwoId).userName();
 
-        chatSessionService.addChatMessageToChatSession(participantOneId, participantTwoId, convertedMsg);
+        if (loggedInUserName.equals(participantOneUserName) || loggedInUserName.equals(participantTwoUserName))
+        {
+            ChatMessage convertedMsg = new ChatMessage(
+                    msg.messageId(),
+                    msg.senderId(),
+                    msg.recipientId(),
+                    msg.timestamp(),
+                    msg.content()
+            );
+
+            chatSessionService.addChatMessageToChatSession(participantOneId, participantTwoId, convertedMsg);
+        }
+        else
+        {
+            throw new IllegalAuthenticationException();
+        }
     }
 
 }
