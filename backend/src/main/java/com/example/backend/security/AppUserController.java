@@ -31,15 +31,25 @@ public class AppUserController {
     }
 
     @GetMapping("/me/contacts")
-    public List<AppUser> getMyContacts(Principal principal){
+    public List<AppUserIdAndNameDTO> getMyContacts(Principal principal){
         if (principal != null) {
 
             AppUser me = appUserService.findAppUserByUserName(principal.getName());
-            ArrayList<AppUser> res = new ArrayList<>();
+            ArrayList<AppUserIdAndNameDTO> res = new ArrayList<>();
             for (ChatSession session : me.chat_sessions()){
-                res.add(appUserService.findAppUserByUserId(
-                        SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(session.uniqueSessionIdentifier(), me.userId())
-                ));
+
+                AppUser originalUserInfoToBeAddedLater =
+                        appUserService.findAppUserByUserId(
+                                SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(session.uniqueSessionIdentifier(), me.userId())
+                        );
+
+                AppUserIdAndNameDTO userDtoToAdd =
+                        new AppUserIdAndNameDTO(
+                                originalUserInfoToBeAddedLater.userId(),
+                                originalUserInfoToBeAddedLater.userName()
+                        );
+
+                res.add(userDtoToAdd);
             }
             return res;
         }
@@ -47,11 +57,18 @@ public class AppUserController {
     }
 
     @GetMapping("/{userName}")
-    public AppUser getByUserName(@PathVariable String userName, Principal principal){
+    public AppUserIdAndNameDTO getByUserName(@PathVariable String userName, Principal principal){
         /*if (principal != null) {
             return principal.getName();
         }*/
-        return appUserService.findAppUserByUserName(userName);
+
+        AppUser originalAppUser = appUserService.findAppUserByUserName(userName);
+        AppUserIdAndNameDTO userDtoToAdd = new AppUserIdAndNameDTO(
+                originalAppUser.userId(),
+                originalAppUser.userName()
+        );
+
+        return userDtoToAdd;
     }
 
     @PostMapping("/login")
