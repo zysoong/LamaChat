@@ -768,3 +768,7 @@ span.status-circle:before {
 #frame .content .message-input .wrap button:focus {
     outline: none;
 }
+
+.robot-icon{
+    margin-left: 5px;
+}
