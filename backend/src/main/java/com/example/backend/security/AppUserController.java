@@ -61,12 +61,12 @@ public class AppUserController {
     public AppUserIdAndNameDTO getByUserName(@PathVariable String userName, Principal principal){
 
         AppUser originalAppUser = appUserService.findAppUserByUserName(userName);
-        AppUserIdAndNameDTO userDtoToAdd = new AppUserIdAndNameDTO(
+
+        return new AppUserIdAndNameDTO(
                 originalAppUser.userId(),
                 originalAppUser.userName()
         );
 
-        return userDtoToAdd;
     }
 
     @PostMapping("/login")
