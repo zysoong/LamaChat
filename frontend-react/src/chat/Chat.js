@@ -35,6 +35,7 @@ const Chat = (props) => {
 
     const [imageMap, setImageMap] = useState({});
     const [ownImage, setOwnImage] = useState(undefined);
+    const ownImageLoaded_Ref = useRef(false);
 
 
     const onMessageReceived = (msg) => {
@@ -90,7 +91,10 @@ const Chat = (props) => {
             .then((me) => {
                 return findUserByUserName(me)
             })
-            .then((user) => {setCurrentUser(user); return user;})
+            .then((user) => {
+                setCurrentUser(user);
+                return user;
+            })
             .then((data) => {
                 stompClient.subscribe(
                     "/user/" + data.userId + "/queue/messages",
@@ -118,12 +122,11 @@ const Chat = (props) => {
 
                 return undefined;
         })
-
             if (activeSessionPartnerID === undefined && users.length > 0) {
                 setActiveSessionPartnerID(users[0].userId)
                 activeSessionPartnerID_Ref.current = users[0].userId
             }
-        });
+        })
     };
 
 
@@ -211,7 +214,7 @@ const Chat = (props) => {
         } else {
             connect();
             loadContacts();
-            setOwnImage(createImageFromInitials(500, currentUser.userName, getRandomColor()))
+
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.history]);
@@ -219,7 +222,6 @@ const Chat = (props) => {
     useEffect(() => {
 
         if (activeSessionPartnerID === undefined) {
-            console.log("Failed to get messages: active contact invalid")
             return;
         }
         else {
@@ -242,6 +244,12 @@ const Chat = (props) => {
                 .then((messages) => {
                     setMessages(messages)
                 })
+                .then(() => {
+                    if (!ownImageLoaded_Ref.current){
+                        setOwnImage(createImageFromInitials(500, currentUser.userName, getRandomColor()));
+                        ownImageLoaded_Ref.current = true;
+                    }
+                })
 
             setNotificationMap((prevNotificationMap) => ({
                 ...prevNotificationMap,
@@ -249,7 +257,7 @@ const Chat = (props) => {
             }));
 
         }
-    }, [activeSessionPartnerID, setMessages]);
+    }, [activeSessionPartnerID, setMessages, ownImageLoaded_Ref, currentUser.userName]);
 
 
     return (
