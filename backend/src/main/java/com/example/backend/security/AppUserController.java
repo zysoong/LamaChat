@@ -1,5 +1,6 @@
 package com.example.backend.security;
 
+import com.example.backend.exception.IllegalAuthenticationException;
 import com.example.backend.model.ChatSession;
 import com.example.backend.utilities.SessionIdentifierUtilities;
 import jakarta.servlet.http.HttpSession;
@@ -27,7 +28,7 @@ public class AppUserController {
         if (principal != null) {
             return principal.getName();
         }
-        return "anonymousUser";
+        throw new IllegalAuthenticationException("Authentication is invalid or removed accidentally. ");
     }
 
     @GetMapping("/me/contacts")

@@ -1,10 +1,9 @@
 package com.example.backend.controller;
 
-import com.example.backend.repository.ChatSessionRepository;
 import com.example.backend.security.AppUser;
+import com.example.backend.security.AppUserIdAndNameDTO;
 import com.example.backend.security.AppUserRepository;
 import com.example.backend.security.AppUserRole;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -162,6 +161,45 @@ public class AppUserControllerTest {
                 )
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].userName").value("user2"));
+
+    }
+
+
+    @Test
+    @DirtiesContext
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
+    void getUser_whenUserExists_thenReturnUserDTO() throws Exception {
+
+        registerUser("user1");
+        registerUser("user2");
+
+        AppUser savedUser2 =
+                appUserRepository
+                        .findAppUserByUserName("user2")
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in AppUser controller test. user2 not found")
+                        );
+
+        AppUserIdAndNameDTO expectedResponse = new AppUserIdAndNameDTO(savedUser2.userId(), "user2");
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/auth/user2")
+                )
+                .andExpect(status().isOk())
+                .andExpect(content().json(objectMapper.writeValueAsString(expectedResponse)));
+
+    }
+
+    @Test
+    @DirtiesContext
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
+    void getUser_whenUserNotExists_thenReturnBadRequest() throws Exception {
+
+
+        mockMvc.perform(
+                        MockMvcRequestBuilders.get("/api/auth/user2")
+                )
+                .andExpect(status().isBadRequest());
 
     }
 
