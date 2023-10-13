@@ -35,6 +35,7 @@ public class AppUserControllerTest {
     @Autowired
     private AppUserRepository appUserRepository;
 
+    @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String TEST_STANDARD_PASSWORD = "123456";

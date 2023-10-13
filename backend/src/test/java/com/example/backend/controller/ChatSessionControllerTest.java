@@ -40,6 +40,7 @@ public class ChatSessionControllerTest {
     @Autowired
     private ChatSessionRepository chatSessionRepository;
 
+    @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
     private static final String TEST_STANDARD_PASSWORD = "123456";
