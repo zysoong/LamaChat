@@ -102,14 +102,14 @@ public class WebSocketControllerTest {
                 appUserRepository
                         .findAppUserByUserName("user1")
                         .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
+                                new NoSuchElementException("Error in Websocket controller test. user1 not found")
                         );
 
         AppUser savedUser2 =
                 appUserRepository
                         .findAppUserByUserName("user2")
                         .orElseThrow(() ->
-                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
+                                new NoSuchElementException("Error in Websocket controller test. user2 not found")
                         );
 
         String serverUrl =   "http://localhost:" + port + "/ws";

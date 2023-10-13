@@ -58,9 +58,6 @@ public class AppUserController {
 
     @GetMapping("/{userName}")
     public AppUserIdAndNameDTO getByUserName(@PathVariable String userName, Principal principal){
-        /*if (principal != null) {
-            return principal.getName();
-        }*/
 
         AppUser originalAppUser = appUserService.findAppUserByUserName(userName);
         AppUserIdAndNameDTO userDtoToAdd = new AppUserIdAndNameDTO(
