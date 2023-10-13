@@ -100,7 +100,6 @@ const loginBasicAuth = (token) => {
             response.text()
             .then( () => {return getMe()})
             .then( (me) => {
-                    //findUserByUserName(me).then()
                     notification.success({
                         message: "Info",
                         description: "User " + me + " has successfully logged in. ",

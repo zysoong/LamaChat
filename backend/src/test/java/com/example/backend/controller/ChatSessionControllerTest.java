@@ -40,23 +40,17 @@ public class ChatSessionControllerTest {
     @Autowired
     private ChatSessionRepository chatSessionRepository;
 
+    @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
-    private void registerUsers(String userName_1, String userName_2) throws Exception {
+    private static final String TEST_STANDARD_PASSWORD = "123456";
+
+    private void registerUsers(String userName) throws Exception {
+
         AppUser user1 = new AppUser(
                 null,
-                userName_1,
-                "123456",
-                AppUserRole.USER,
-                new ArrayList<>(),
-                false,
-                "", ""
-        );
-
-        AppUser user2 = new AppUser(
-                null,
-                userName_2,
-                "123456",
+                userName,
+                TEST_STANDARD_PASSWORD,
                 AppUserRole.USER,
                 new ArrayList<>(),
                 false,
@@ -66,11 +60,6 @@ public class ChatSessionControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(user1)))
-                .andExpect(status().isCreated());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2)))
                 .andExpect(status().isCreated());
     }
 
@@ -131,12 +120,13 @@ public class ChatSessionControllerTest {
 
     @Test
     @DirtiesContext
-    @WithMockUser
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addChatSession_whenNoChatSessionExistsAndUserExists_thenAddNewSessionToDB() throws Exception {
 
         String userName_1 = "user1";
         String userName_2 = "user2";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatSessionToUsers(userName_1, userName_2);
 
         AppUser user1AfterCreation =
@@ -168,12 +158,13 @@ public class ChatSessionControllerTest {
 
     @Test
     @DirtiesContext
-    @WithMockUser
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addChatSession_whenChatSessionExistsAndUserExists_thenDoNothing() throws Exception {
 
         String userName_1 = "user1";
         String userName_2 = "user2";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatSessionToUsers(userName_1, userName_2);
         addChatSessionToUsers(userName_1, userName_2);
 
@@ -211,9 +202,42 @@ public class ChatSessionControllerTest {
 
     }
 
+
     @Test
     @DirtiesContext
-    @WithMockUser
+    @WithMockUser(username = "user3", password = TEST_STANDARD_PASSWORD)
+    void addChatSession_whenIrrelevantUserLoggedIn_thenReturnBadRequest() throws Exception {
+
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        registerUsers(userName_1);
+        registerUsers(userName_2);
+
+        AppUser savedUser1 =
+                appUserRepository
+                        .findAppUserByUserName(userName_1)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
+                        );
+
+        AppUser savedUser2 =
+                appUserRepository
+                        .findAppUserByUserName(userName_2)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
+                        );
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
+                        savedUser1.userId() + "/" + savedUser2.userId())
+                )
+                .andExpect(status().isUnauthorized());
+
+    }
+
+
+    @Test
+    @DirtiesContext
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addChatSession_whenUserDoesNotExist_thenReturnBadRequest() throws Exception {
 
         mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/" +
@@ -225,13 +249,14 @@ public class ChatSessionControllerTest {
 
     @Test
     @DirtiesContext
-    @WithMockUser
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addMessageToChatSession_whenNoChatSessionExists_thenAddNewSessionAndAddMessage() throws Exception {
 
         String userName_1 = "user1";
         String userName_2 = "user2";
         String content = "Hi! How was it going. ";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatMessageToUsers(userName_1, userName_2, content);
 
         AppUser user1AfterCreation =
@@ -269,13 +294,59 @@ public class ChatSessionControllerTest {
 
     @Test
     @DirtiesContext
-    @WithMockUser
+    @WithMockUser(username = "user3", password = TEST_STANDARD_PASSWORD)
+    void addChatMessageToChatSession_whenIrrelevantUserLoggedIn_thenReturnBadRequest() throws Exception {
+
+        String userName_1 = "user1";
+        String userName_2 = "user2";
+        String content = "Hi! How was it going. ";
+        registerUsers(userName_1);
+        registerUsers(userName_2);
+
+        AppUser savedUser1 =
+                appUserRepository
+                        .findAppUserByUserName(userName_1)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user1 not found")
+                        );
+
+        AppUser savedUser2 =
+                appUserRepository
+                        .findAppUserByUserName(userName_2)
+                        .orElseThrow(() ->
+                                new NoSuchElementException("Error in ChatSession controller test. user2 not found")
+                        );
+
+        LocalDate localDate = LocalDate.now();
+        Date date = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        ChatMessage msgToSend = new ChatMessage(
+                null,
+                savedUser1.userId(),
+                savedUser2.userId(),
+                date,
+                content
+        );
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/api/chatsessions/message/" + savedUser1.userId() + "/" + savedUser2.userId())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(msgToSend)))
+                .andExpect(status().isUnauthorized());
+
+
+
+    }
+
+    @Test
+    @DirtiesContext
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addMessageToChatSession_whenChatSessionExists_thenAddMessage() throws Exception {
 
         String userName_1 = "user1";
         String userName_2 = "user2";
         String content = "Hi! How was it going. ";
-        registerUsers(userName_1, userName_2);
+        registerUsers(userName_1);
+        registerUsers(userName_2);
         addChatSessionToUsers(userName_1, userName_2);
         addChatMessageToUsers(userName_1, userName_2, content);
 
@@ -322,7 +393,7 @@ public class ChatSessionControllerTest {
 
     @Test
     @DirtiesContext
-    @WithMockUser
+    @WithMockUser(username = "user1", password = TEST_STANDARD_PASSWORD)
     void addMessageToChatSession_whenUserDoesNotExist_thenThrowNoSuchElementException() throws Exception {
 
         LocalDate localDate = LocalDate.now();

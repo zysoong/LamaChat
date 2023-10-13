@@ -1,5 +1,6 @@
 package com.example.backend.security;
 
+import com.example.backend.exception.IllegalAuthenticationException;
 import com.example.backend.model.ChatSession;
 import com.example.backend.utilities.SessionIdentifierUtilities;
 import jakarta.servlet.http.HttpSession;
@@ -27,19 +28,29 @@ public class AppUserController {
         if (principal != null) {
             return principal.getName();
         }
-        return "anonymousUser";
+        throw new IllegalAuthenticationException("Authentication is invalid or removed accidentally. ");
     }
 
     @GetMapping("/me/contacts")
-    public List<AppUser> getMyContacts(Principal principal){
+    public List<AppUserIdAndNameDTO> getMyContacts(Principal principal){
         if (principal != null) {
 
             AppUser me = appUserService.findAppUserByUserName(principal.getName());
-            ArrayList<AppUser> res = new ArrayList<>();
+            ArrayList<AppUserIdAndNameDTO> res = new ArrayList<>();
             for (ChatSession session : me.chat_sessions()){
-                res.add(appUserService.findAppUserByUserId(
-                        SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(session.uniqueSessionIdentifier(), me.userId())
-                ));
+
+                AppUser originalUserInfoToBeAddedLater =
+                        appUserService.findAppUserByUserId(
+                                SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(session.uniqueSessionIdentifier(), me.userId())
+                        );
+
+                AppUserIdAndNameDTO userDtoToAdd =
+                        new AppUserIdAndNameDTO(
+                                originalUserInfoToBeAddedLater.userId(),
+                                originalUserInfoToBeAddedLater.userName()
+                        );
+
+                res.add(userDtoToAdd);
             }
             return res;
         }
@@ -47,11 +58,15 @@ public class AppUserController {
     }
 
     @GetMapping("/{userName}")
-    public AppUser getByUserName(@PathVariable String userName, Principal principal){
-        /*if (principal != null) {
-            return principal.getName();
-        }*/
-        return appUserService.findAppUserByUserName(userName);
+    public AppUserIdAndNameDTO getByUserName(@PathVariable String userName, Principal principal){
+
+        AppUser originalAppUser = appUserService.findAppUserByUserName(userName);
+        AppUserIdAndNameDTO userDtoToAdd = new AppUserIdAndNameDTO(
+                originalAppUser.userId(),
+                originalAppUser.userName()
+        );
+
+        return userDtoToAdd;
     }
 
     @PostMapping("/login")
