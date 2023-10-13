@@ -19,30 +19,27 @@ const Chat = (props) => {
 
     const [currentUser, setCurrentUser] = useRecoilState(loggedInUser);
     const [sessionPartners, setSessionPartners] = useState([]);
+    const sessionPartners_Ref = useRef();
+    sessionPartners_Ref.current = sessionPartners;
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
-    const activeSessionPartnerID_Ref = useRef(undefined);
-    const isExistingContact = useRef(false);
+    const activeSessionPartnerID_Ref = useRef();
+    activeSessionPartnerID_Ref.current = activeSessionPartnerID;
 
     const [chatText, setChatText] = useState("");
     const [messages, setMessages] = useState([]);
+    const [notificationMap, setNotificationMap] = useState({});
 
     const [isAdding, setIsAdding] = useState(false);
     const [addUserText, setAddUserText] = useState("");
-    
+
     const [imageMap, setImageMap] = useState({});
     const [ownImage, setOwnImage] = useState(undefined);
 
 
-    useEffect( () => {
-        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
-        activeSessionPartnerID_Ref.current = activeSessionPartnerID
-    }, [activeSessionPartnerID, sessionPartners])
-
     const onMessageReceived = (msg) => {
 
-        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(JSON.parse(msg.body).senderId))
 
-        if (!isExistingContact.current)
+        if (!sessionPartners_Ref.current.map(partner => partner.userId).includes(JSON.parse(msg.body).senderId))
         {
             getMyContacts()
                 .then((users) =>
@@ -57,7 +54,7 @@ const Chat = (props) => {
                             if (user.userId === JSON.parse(msg.body).senderId){
                                 setImageMap((prevImageMap) => ({
                                     ...prevImageMap,
-                                    [JSON.parse(msg.body).senderId]: createImageFromInitials(500, JSON.parse(msg.body).senderId, getRandomColor()),
+                                    [JSON.parse(msg.body).senderId]: createImageFromInitials(500, user.userName, getRandomColor()),
                                 }));
                             }
                             return undefined;
@@ -69,9 +66,17 @@ const Chat = (props) => {
 
                 })
         }
+
         if (activeSessionPartnerID_Ref.current === JSON.parse(msg.body).senderId)
         {
             setMessages(messages => [...messages, JSON.parse(msg.body)])
+        }
+        else
+        {
+            setNotificationMap((prevNotificationMap) => ({
+                ...prevNotificationMap,
+                [JSON.parse(msg.body).senderId]: true,
+            }));
         }
     }
 
@@ -98,12 +103,20 @@ const Chat = (props) => {
 
             setSessionPartners(users);
 
-            users.map(user => (
+            users.map(user => {
+
                 setImageMap((prevImageMap) => ({
                     ...prevImageMap,
                     [user.userId]: createImageFromInitials(500, user.userName, getRandomColor()),
-                }))
-            ))
+                }));
+
+                setNotificationMap((prevNotificationMap) => ({
+                    ...prevNotificationMap,
+                    [user.userId]: false,
+                }));
+
+                return undefined;
+        })
 
             if (activeSessionPartnerID === undefined && users.length > 0) {
                 setActiveSessionPartnerID(users[0].userId)
@@ -228,6 +241,12 @@ const Chat = (props) => {
                 .then((messages) => {
                     setMessages(messages)
                 })
+
+            setNotificationMap((prevNotificationMap) => ({
+                ...prevNotificationMap,
+                [activeSessionPartnerID]: false,
+            }));
+
         }
     }, [activeSessionPartnerID, setMessages]);
 
@@ -260,7 +279,11 @@ const Chat = (props) => {
                                 }
                             >
                                 <div className="wrap">
-                                    <span className="contact-status online"></span>
+
+                                    {notificationMap[partner.userId] ? (
+                                        <span className="contact-status online"></span>
+                                    ) : null}
+
                                     <img id={partner.userId} src={imageMap[partner.userId]} alt=""/>
                                     <div className="meta">
                                         <p className="name">{partner.userName}</p>
