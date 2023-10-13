@@ -60,6 +60,7 @@ public class WebSocketControllerTest {
     @LocalServerPort
     private int port;
 
+    @Autowired
     ObjectMapper objectMapper = new ObjectMapper();
 
     @Test
