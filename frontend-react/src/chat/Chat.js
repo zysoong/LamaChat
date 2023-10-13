@@ -26,6 +26,8 @@ const Chat = (props) => {
     const isExistingContact = useRef(false)
     const [isAdding, setIsAdding] = useState(false)
     const [addUserText, setAddUserText] = useState("")
+    const [imageMap, setImageMap] = useState({});
+    const [ownImage, setOwnImage] = useState(undefined)
 
     useEffect( () => {
         isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
@@ -38,9 +40,30 @@ const Chat = (props) => {
 
         if (!isExistingContact.current)
         {
-            getMyContacts().then((users) => {
-                setSessionPartners(users);
-            })
+            getMyContacts()
+                .then((users) =>
+                {
+                    const promise1 = new Promise((resolve) => {
+                        setSessionPartners(users);
+                        resolve();
+                    })
+
+                    const promise2 = new Promise((resolve) => {
+                        users.map(user => {
+                            if (user.userId === JSON.parse(msg.body).senderId){
+                                setImageMap((prevImageMap) => ({
+                                    ...prevImageMap,
+                                    [JSON.parse(msg.body).senderId]: createImageFromInitials(500, JSON.parse(msg.body).senderId, getRandomColor()),
+                                }));
+                            }
+                            return undefined;
+                        });
+                        resolve();
+                    })
+
+                    Promise.all([promise1, promise2]).then();
+
+                })
         }
         if (activeSessionPartnerID_Ref.current === JSON.parse(msg.body).senderId)
         {
@@ -68,7 +91,16 @@ const Chat = (props) => {
 
     const loadContacts = () => {
         getMyContacts().then((users) => {
+
             setSessionPartners(users);
+
+            users.map(user => (
+                setImageMap((prevImageMap) => ({
+                    ...prevImageMap,
+                    [user.userId]: createImageFromInitials(500, user.userName, getRandomColor()),
+                }))
+            ))
+
             if (activeSessionPartnerID === undefined && users.length > 0) {
                 setActiveSessionPartnerID(users[0].userId)
                 activeSessionPartnerID_Ref.current = users[0].userId
@@ -161,6 +193,7 @@ const Chat = (props) => {
         } else {
             connect();
             loadContacts();
+            setOwnImage(createImageFromInitials(500, currentUser.userName, getRandomColor()))
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.history]);
@@ -202,7 +235,7 @@ const Chat = (props) => {
                     <div className="wrap">
                         <img
                             id="profile-img"
-                            src={createImageFromInitials(500, currentUser.userName, getRandomColor())}
+                            src={ownImage}
                             className="online"
                             alt=""
                         />
@@ -224,7 +257,7 @@ const Chat = (props) => {
                             >
                                 <div className="wrap">
                                     <span className="contact-status online"></span>
-                                    <img id={partner.userId} src={createImageFromInitials(500, partner.userName, getRandomColor())} alt="" />
+                                    <img id={partner.userId} src={imageMap[partner.userId]} alt=""/>
                                     <div className="meta">
                                         <p className="name">{partner.userName}</p>
                                     </div>
