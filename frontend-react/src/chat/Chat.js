@@ -18,16 +18,20 @@ let stompClient = null;
 const Chat = (props) => {
 
     const [currentUser, setCurrentUser] = useRecoilState(loggedInUser);
-    const [text, setText] = useState("");
     const [sessionPartners, setSessionPartners] = useState([]);
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
     const activeSessionPartnerID_Ref = useRef(undefined);
+    const isExistingContact = useRef(false);
+
+    const [chatText, setChatText] = useState("");
     const [messages, setMessages] = useState([]);
-    const isExistingContact = useRef(false)
-    const [isAdding, setIsAdding] = useState(false)
-    const [addUserText, setAddUserText] = useState("")
+
+    const [isAdding, setIsAdding] = useState(false);
+    const [addUserText, setAddUserText] = useState("");
+    
     const [imageMap, setImageMap] = useState({});
-    const [ownImage, setOwnImage] = useState(undefined)
+    const [ownImage, setOwnImage] = useState(undefined);
+
 
     useEffect( () => {
         isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
@@ -301,9 +305,6 @@ const Chat = (props) => {
                 </div>
             </div>
             <div className="content">
-                <div className="contact-profile">
-                    <p>{}</p>
-                </div>
                 <ScrollToBottom className="messages">
                     <ul>
                         {messages.map((msg, i) => (
@@ -322,12 +323,12 @@ const Chat = (props) => {
                             name="user_input"
                             size="large"
                             placeholder="Write your message..."
-                            value={text}
-                            onChange={(event) => setText(event.target.value)}
+                            value={chatText}
+                            onChange={(event) => setChatText(event.target.value)}
                             onKeyPress={(event) => {
                                 if (event.key === "Enter") {
-                                    sendMessage(text);
-                                    setText("");
+                                    sendMessage(chatText);
+                                    setChatText("");
                                 }
                             }}
                         />
@@ -335,8 +336,8 @@ const Chat = (props) => {
                         <Button
                             icon={<i className="fa fa-paper-plane" aria-hidden="true"></i>}
                             onClick={() => {
-                                sendMessage(text);
-                                setText("");
+                                sendMessage(chatText);
+                                setChatText("");
                             }}
                             disabled={sessionPartners.length === 0}
                         />
