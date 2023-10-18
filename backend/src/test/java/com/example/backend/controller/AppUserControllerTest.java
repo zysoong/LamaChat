@@ -1,7 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.security.AppUser;
-import com.example.backend.security.AppUserIdAndNameDTO;
+import com.example.backend.security.AppUserDTO;
 import com.example.backend.security.AppUserRepository;
 import com.example.backend.security.AppUserRole;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class AppUserControllerTest {
+class AppUserControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -181,7 +181,7 @@ public class AppUserControllerTest {
                                 new NoSuchElementException("Error in AppUser controller test. user2 not found")
                         );
 
-        AppUserIdAndNameDTO expectedResponse = new AppUserIdAndNameDTO(savedUser2.userId(), "user2");
+        AppUserDTO expectedResponse = new AppUserDTO(savedUser2.userId(), "user2", false);
 
         mockMvc.perform(
                         MockMvcRequestBuilders.get("/api/auth/user2")

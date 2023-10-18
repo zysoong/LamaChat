@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState} from "react";
-import {Button, notification} from "antd";
+import { Button, notification } from "antd";
+
 import {
     getMe, findUserByUserName, findOrAddChatSessionByParticipantIds, getMyContacts, logout,
 } from "../util/ApiUtil";
@@ -18,33 +19,66 @@ let stompClient = null;
 const Chat = (props) => {
 
     const [currentUser, setCurrentUser] = useRecoilState(loggedInUser);
-    const [text, setText] = useState("");
     const [sessionPartners, setSessionPartners] = useState([]);
+    const sessionPartners_Ref = useRef();
+    sessionPartners_Ref.current = sessionPartners;
     const [activeSessionPartnerID, setActiveSessionPartnerID] = useState(undefined);
-    const activeSessionPartnerID_Ref = useRef(undefined);
-    const [messages, setMessages] = useState([]);
-    const isExistingContact = useRef(false)
-    const [isAdding, setIsAdding] = useState(false)
-    const [addUserText, setAddUserText] = useState("")
+    const activeSessionPartnerID_Ref = useRef();
+    activeSessionPartnerID_Ref.current = activeSessionPartnerID;
 
-    useEffect( () => {
-        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(activeSessionPartnerID))
-        activeSessionPartnerID_Ref.current = activeSessionPartnerID
-    }, [activeSessionPartnerID, sessionPartners])
+    const [chatText, setChatText] = useState("");
+    const [messages, setMessages] = useState([]);
+    const [notificationMap, setNotificationMap] = useState({});
+
+    const [isAdding, setIsAdding] = useState(false);
+    const [addUserText, setAddUserText] = useState("");
+
+    const [imageMap, setImageMap] = useState({});
+    const [ownImage, setOwnImage] = useState(undefined);
+    const ownImageLoaded_Ref = useRef(false);
+
 
     const onMessageReceived = (msg) => {
 
-        isExistingContact.current = (sessionPartners.map(partner => partner.userId).includes(JSON.parse(msg.body).senderId))
 
-        if (!isExistingContact.current)
+        if (!sessionPartners_Ref.current.map(partner => partner.userId).includes(JSON.parse(msg.body).senderId))
         {
-            getMyContacts().then((users) => {
-                setSessionPartners(users);
-            })
+            getMyContacts()
+                .then((users) =>
+                {
+                    const promise1 = new Promise((resolve) => {
+                        setSessionPartners(users);
+                        resolve();
+                    })
+
+                    const promise2 = new Promise((resolve) => {
+                        users.map(user => {
+                            if (user.userId === JSON.parse(msg.body).senderId){
+                                setImageMap((prevImageMap) => ({
+                                    ...prevImageMap,
+                                    [JSON.parse(msg.body).senderId]: createImageFromInitials(500, user.userName, getRandomColor()),
+                                }));
+                            }
+                            return undefined;
+                        });
+                        resolve();
+                    })
+
+                    Promise.all([promise1, promise2]).then();
+
+                })
         }
+
         if (activeSessionPartnerID_Ref.current === JSON.parse(msg.body).senderId)
         {
             setMessages(messages => [...messages, JSON.parse(msg.body)])
+        }
+        else
+        {
+            setNotificationMap((prevNotificationMap) => ({
+                ...prevNotificationMap,
+                [JSON.parse(msg.body).senderId]: true,
+            }));
         }
     }
 
@@ -57,7 +91,10 @@ const Chat = (props) => {
             .then((me) => {
                 return findUserByUserName(me)
             })
-            .then((user) => {setCurrentUser(user); return user;})
+            .then((user) => {
+                setCurrentUser(user);
+                return user;
+            })
             .then((data) => {
                 stompClient.subscribe(
                     "/user/" + data.userId + "/queue/messages",
@@ -68,12 +105,28 @@ const Chat = (props) => {
 
     const loadContacts = () => {
         getMyContacts().then((users) => {
+
             setSessionPartners(users);
+
+            users.map(user => {
+
+                setImageMap((prevImageMap) => ({
+                    ...prevImageMap,
+                    [user.userId]: createImageFromInitials(500, user.userName, getRandomColor()),
+                }));
+
+                setNotificationMap((prevNotificationMap) => ({
+                    ...prevNotificationMap,
+                    [user.userId]: false,
+                }));
+
+                return undefined;
+        })
             if (activeSessionPartnerID === undefined && users.length > 0) {
                 setActiveSessionPartnerID(users[0].userId)
                 activeSessionPartnerID_Ref.current = users[0].userId
             }
-        });
+        })
     };
 
 
@@ -161,6 +214,7 @@ const Chat = (props) => {
         } else {
             connect();
             loadContacts();
+
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [props.history]);
@@ -168,7 +222,6 @@ const Chat = (props) => {
     useEffect(() => {
 
         if (activeSessionPartnerID === undefined) {
-            console.log("Failed to get messages: active contact invalid")
             return;
         }
         else {
@@ -191,8 +244,20 @@ const Chat = (props) => {
                 .then((messages) => {
                     setMessages(messages)
                 })
+                .then(() => {
+                    if (!ownImageLoaded_Ref.current){
+                        setOwnImage(createImageFromInitials(500, currentUser.userName, getRandomColor()));
+                        ownImageLoaded_Ref.current = true;
+                    }
+                })
+
+            setNotificationMap((prevNotificationMap) => ({
+                ...prevNotificationMap,
+                [activeSessionPartnerID]: false,
+            }));
+
         }
-    }, [activeSessionPartnerID, setMessages]);
+    }, [activeSessionPartnerID, setMessages, ownImageLoaded_Ref, currentUser.userName]);
 
 
     return (
@@ -202,7 +267,7 @@ const Chat = (props) => {
                     <div className="wrap">
                         <img
                             id="profile-img"
-                            src={createImageFromInitials(500, currentUser.userName, getRandomColor())}
+                            src={ownImage}
                             className="online"
                             alt=""
                         />
@@ -223,10 +288,21 @@ const Chat = (props) => {
                                 }
                             >
                                 <div className="wrap">
-                                    <span className="contact-status online"></span>
-                                    <img id={partner.userId} src={createImageFromInitials(500, partner.userName, getRandomColor())} alt="" />
+
+                                    {notificationMap[partner.userId] ? (
+                                        <span className="contact-status online"></span>
+                                    ) : null}
+
+                                    <img id={partner.userId} src={imageMap[partner.userId]} alt=""/>
                                     <div className="meta">
-                                        <p className="name">{partner.userName}</p>
+                                        <p className="name">
+                                            {partner.userName}
+                                            {partner.isVirtualAgent ? (
+                                                <i className="robot-icon">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24"><path fill="currentColor" d="M12 2a2 2 0 0 1 2 2c0 .74-.4 1.39-1 1.73V7h1a7 7 0 0 1 7 7h1a1 1 0 0 1 1 1v3a1 1 0 0 1-1 1h-1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-1H2a1 1 0 0 1-1-1v-3a1 1 0 0 1 1-1h1a7 7 0 0 1 7-7h1V5.73c-.6-.34-1-.99-1-1.73a2 2 0 0 1 2-2M7.5 13A2.5 2.5 0 0 0 5 15.5A2.5 2.5 0 0 0 7.5 18a2.5 2.5 0 0 0 2.5-2.5A2.5 2.5 0 0 0 7.5 13m9 0a2.5 2.5 0 0 0-2.5 2.5a2.5 2.5 0 0 0 2.5 2.5a2.5 2.5 0 0 0 2.5-2.5a2.5 2.5 0 0 0-2.5-2.5Z"/></svg>
+                                                </i>
+                                            ) : null}
+                                        </p>
                                     </div>
                                 </div>
                             </li>
@@ -268,9 +344,6 @@ const Chat = (props) => {
                 </div>
             </div>
             <div className="content">
-                <div className="contact-profile">
-                    <p>{}</p>
-                </div>
                 <ScrollToBottom className="messages">
                     <ul>
                         {messages.map((msg, i) => (
@@ -289,12 +362,12 @@ const Chat = (props) => {
                             name="user_input"
                             size="large"
                             placeholder="Write your message..."
-                            value={text}
-                            onChange={(event) => setText(event.target.value)}
+                            value={chatText}
+                            onChange={(event) => setChatText(event.target.value)}
                             onKeyPress={(event) => {
                                 if (event.key === "Enter") {
-                                    sendMessage(text);
-                                    setText("");
+                                    sendMessage(chatText);
+                                    setChatText("");
                                 }
                             }}
                         />
@@ -302,8 +375,8 @@ const Chat = (props) => {
                         <Button
                             icon={<i className="fa fa-paper-plane" aria-hidden="true"></i>}
                             onClick={() => {
-                                sendMessage(text);
-                                setText("");
+                                sendMessage(chatText);
+                                setChatText("");
                             }}
                             disabled={sessionPartners.length === 0}
                         />
