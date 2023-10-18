@@ -48,7 +48,7 @@ public class AppUserController {
                         new AppUserDTO(
                                 originalUserInfoToBeAddedLater.userId(),
                                 originalUserInfoToBeAddedLater.userName(),
-                                false
+                                originalUserInfoToBeAddedLater.isVirtualAgent()
                         );
 
                 res.add(userDtoToAdd);
