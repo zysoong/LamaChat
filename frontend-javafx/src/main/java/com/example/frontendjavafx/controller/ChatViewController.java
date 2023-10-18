@@ -3,7 +3,7 @@ package com.example.frontendjavafx.controller;
 import com.example.frontendjavafx.model.ChatMessage;
 import com.example.frontendjavafx.model.ChatMessageSend;
 import com.example.frontendjavafx.model.ChatSession;
-import com.example.frontendjavafx.security.AppUserIdAndNameDTO;
+import com.example.frontendjavafx.security.AppUserDTO;
 import com.example.frontendjavafx.security.AuthenticationService;
 import com.example.frontendjavafx.service.ChatViewService;
 import com.example.frontendjavafx.service.SceneSwitchService;
@@ -56,7 +56,7 @@ public class ChatViewController {
     private StompSession stompSession;
     private ObjectMapper objectMapper = new ObjectMapper();
 
-    private List<AppUserIdAndNameDTO> myContacts;
+    private List<AppUserDTO> myContacts;
     private List<String> namesOfMyContacts;
     private Map<String, String> mapFromUsernameToUserId = new HashMap<>();
     private Map<String, String> mapFromUserIdToUserName = new HashMap<>();
@@ -185,7 +185,7 @@ public class ChatViewController {
         this.namesOfMyContacts = new ArrayList<>();
         this.myId = ChatViewService.getInstance().getMeAsUserObject().userId();
 
-        for (AppUserIdAndNameDTO contact : myContacts){
+        for (AppUserDTO contact : myContacts){
             namesOfMyContacts.add(contact.userName());
             mapFromUsernameToUserId.put(contact.userName(), contact.userId());
             mapFromUserIdToUserName.put(contact.userId(), contact.userName());

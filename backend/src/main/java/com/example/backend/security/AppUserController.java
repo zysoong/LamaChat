@@ -32,11 +32,11 @@ public class AppUserController {
     }
 
     @GetMapping("/me/contacts")
-    public List<AppUserIdAndNameDTO> getMyContacts(Principal principal){
+    public List<AppUserDTO> getMyContacts(Principal principal){
         if (principal != null) {
 
             AppUser me = appUserService.findAppUserByUserName(principal.getName());
-            ArrayList<AppUserIdAndNameDTO> res = new ArrayList<>();
+            ArrayList<AppUserDTO> res = new ArrayList<>();
             for (ChatSession session : me.chat_sessions()){
 
                 AppUser originalUserInfoToBeAddedLater =
@@ -44,10 +44,11 @@ public class AppUserController {
                                 SessionIdentifierUtilities.getReceiverFromUniqueIdentifier(session.uniqueSessionIdentifier(), me.userId())
                         );
 
-                AppUserIdAndNameDTO userDtoToAdd =
-                        new AppUserIdAndNameDTO(
+                AppUserDTO userDtoToAdd =
+                        new AppUserDTO(
                                 originalUserInfoToBeAddedLater.userId(),
-                                originalUserInfoToBeAddedLater.userName()
+                                originalUserInfoToBeAddedLater.userName(),
+                                false
                         );
 
                 res.add(userDtoToAdd);
@@ -58,13 +59,14 @@ public class AppUserController {
     }
 
     @GetMapping("/{userName}")
-    public AppUserIdAndNameDTO getByUserName(@PathVariable String userName, Principal principal){
+    public AppUserDTO getByUserName(@PathVariable String userName, Principal principal){
 
         AppUser originalAppUser = appUserService.findAppUserByUserName(userName);
 
-        return new AppUserIdAndNameDTO(
+        return new AppUserDTO(
                 originalAppUser.userId(),
-                originalAppUser.userName()
+                originalAppUser.userName(),
+                false
         );
 
     }

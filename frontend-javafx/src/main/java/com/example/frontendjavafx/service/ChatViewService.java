@@ -2,7 +2,7 @@ package com.example.frontendjavafx.service;
 
 import com.example.frontendjavafx.model.ChatSession;
 import com.example.frontendjavafx.security.AppUser;
-import com.example.frontendjavafx.security.AppUserIdAndNameDTO;
+import com.example.frontendjavafx.security.AppUserDTO;
 import com.example.frontendjavafx.security.AuthenticationService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -31,7 +31,7 @@ public class ChatViewService {
         return instance;
     }
 
-    public List<AppUserIdAndNameDTO> getMyContacts(){
+    public List<AppUserDTO> getMyContacts(){
 
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(URL_BACKEND + "/api/auth/me/contacts"))
@@ -39,7 +39,7 @@ public class ChatViewService {
                 .header("Cookie", "JSESSIONID=" + AuthenticationService.getInstance().getSessionId())
                 .build();
 
-        List<AppUserIdAndNameDTO> result = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
+        List<AppUserDTO> result = client.sendAsync(request, HttpResponse.BodyHandlers.ofString())
                 .thenApply(HttpResponse::body)
                 .thenApply(responseBody -> mapToUserList(responseBody))
                 .join();
@@ -106,7 +106,7 @@ public class ChatViewService {
         }
     }
 
-    private List<AppUserIdAndNameDTO> mapToUserList(String responseBody) {
+    private List<AppUserDTO> mapToUserList(String responseBody) {
         try {
             return objectMapper.readValue(responseBody, new TypeReference<>() {});
         } catch (JsonProcessingException e) {
