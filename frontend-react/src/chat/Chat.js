@@ -228,11 +228,16 @@ const Chat = (props) => {
 
             setMessages([])
 
+
             getMe()
                 .then((me) => {
                     return findUserByUserName(me)
                 })
                 .then((user) => {
+                    if (!ownImageLoaded_Ref.current){
+                        setOwnImage(createImageFromInitials(500, user.userName, getRandomColor()));
+                        ownImageLoaded_Ref.current = true;
+                    }
                     return user.userId;
                 })
                 .then((userId) => {
@@ -243,12 +248,6 @@ const Chat = (props) => {
                 })
                 .then((messages) => {
                     setMessages(messages)
-                })
-                .then(() => {
-                    if (!ownImageLoaded_Ref.current){
-                        setOwnImage(createImageFromInitials(500, currentUser.userName, getRandomColor()));
-                        ownImageLoaded_Ref.current = true;
-                    }
                 })
 
             setNotificationMap((prevNotificationMap) => ({
