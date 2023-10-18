@@ -9,9 +9,11 @@ netsh interface portproxy show v4tov4
     Use 192.168.... to connect wsl
 
 --> Use screen to run programs parallely:
+    screen -S <screen-name>
     screen -ls
     screen -r
     screen -XS <session-id> quit
+    ctrl + a + d --> detach anytime
 
 --> Expose api to internet (temporary)
     ngrok http 5000
